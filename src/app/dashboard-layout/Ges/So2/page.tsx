@@ -78,7 +78,7 @@ const So2_ = () => {
           setLoadingGesData(true);
           setErrorGesData(null);
           const encodedLocationName = encodeURIComponent(selectedLocationName);
-          const rs = await fetch(`https://cass-api-data.vercel.app/api/gesso2/${encodedLocationName}`);
+          const rs = await fetch(`http://localhost:3005/api/gesso2/${encodedLocationName}`);
           if (!rs.ok) throw new Error(`HTTP error! status: ${rs.status}`);
           const rs_json: Ges[] = await rs.json();
           setGesData(rs_json);
@@ -137,7 +137,7 @@ const So2_ = () => {
       const day = selectedDate.getDate();
 
       try {
-        const rs = await fetch(`https://cass-api-data.vercel.app/api/gesso2/${year}/${month}/${day}/${selectedLocation.id}`);
+        const rs = await fetch(`http://localhost:3005/api/gesso2/${year}/${month}/${day}/${selectedLocation.id}`);
         if (!rs.ok) throw new Error(`HTTP error! status: ${rs.status}`);
         const rs_json = await rs.json();
         setLocationsShowall(rs_json);
@@ -168,7 +168,7 @@ const So2_ = () => {
       }
       const year = selectedDate.getFullYear();
       const month = selectedDate.getMonth() + 1;
-      const rs = await fetch(`https://cass-api-data.vercel.app/api/gesso2/${year}/${month}/${selectedLocation.id}`);
+      const rs = await fetch(`http://localhost:3005/api/gesso2/${year}/${month}/${selectedLocation.id}`);
       const rs_json = await rs.json();
       setLocationShowDataMonth(rs_json);
     } catch (err) {
@@ -190,7 +190,7 @@ const So2_ = () => {
           return;
       }
       const year = selectedDate.getFullYear();
-      const rs = await fetch(`https://cass-api-data.vercel.app/api/gesso2/${year}/${selectedLocation.id}`);
+      const rs = await fetch(`http://localhost:3005/api/gesso2/${year}/${selectedLocation.id}`);
       const rs_json = await rs.json();
       setLocationShowDataYaer(rs_json);
     } catch (err) {

@@ -1,3 +1,5 @@
+'use client';
+
 import imagesnru from '../../Image/snru-logo-n.png';
 
 export default function AboutPage() {
