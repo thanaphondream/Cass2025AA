@@ -100,7 +100,7 @@ export default function HomePage() {
 };
 
     fetchData();
-  }, []);
+  });
 
   if (loading) {
     return (

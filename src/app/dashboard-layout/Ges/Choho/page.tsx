@@ -70,7 +70,7 @@ const Choho_ = () => {
       }
     };
     fetchLocations();
-  }, []);
+  });
 
   // Fetch GES data (to determine available dates) for the selected location
   useEffect(() => {

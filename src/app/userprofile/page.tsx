@@ -106,7 +106,7 @@ const User_ = () => {
     };
 
     Dataapi();
-  }, []);
+  });
 
   return (
     // <div className="max-w-md mx-auto mt-12 p-6 bg-white rounded shadow">

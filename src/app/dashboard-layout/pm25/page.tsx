@@ -108,7 +108,7 @@ const Pm25 = () => {
       }
     };
     fetchData();
-  }, []);
+  });
 
   const api_checkProvince = async (name: string) => {
     const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm111/${name}`)

@@ -55,7 +55,7 @@ export default function CalendarFromNestedAPI() {
         setDatesWithData(allDates);
       })
       .catch((err) => console.error("API fetch error", err));
-  }, []);
+  });
 
   const dataDatesSet = new Set(datesWithData.map((d) => d.toDateString()));
   const filterDate = (date: Date) => dataDatesSet.has(date.toDateString());

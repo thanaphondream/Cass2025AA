@@ -85,7 +85,7 @@ const DownloadPage = () => {
       }
     };
     fetchData();
-  }, []);
+  });
 
   
     // const headers = [

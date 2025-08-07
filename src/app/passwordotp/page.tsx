@@ -21,7 +21,7 @@ const PasswordOTP = () => {
 
   useEffect(() => {
     setPassword(sessionStorage.getItem("password"));
-  }, []);
+  });
 
   useEffect(() => {
     if (cooldown === 0) return;

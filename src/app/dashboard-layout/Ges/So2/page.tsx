@@ -69,7 +69,7 @@ const So2_ = () => {
       }
     };
     fetchLocations();
-  }, []);
+  });
 
   useEffect(() => {
     const fetchGesData = async () => {

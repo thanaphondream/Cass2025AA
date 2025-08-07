@@ -68,7 +68,7 @@ const No2_ = () => {
       }
     };
     fetchLocations();
-  }, []);
+  });
 
   useEffect(() => {
     const fetchGesData = async () => {
