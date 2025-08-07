@@ -9,6 +9,8 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { TooltipItem } from "chart.js";
+
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -112,7 +114,7 @@ export default function YearlyChohoBarChart({ dataSource }: YearlyChartProps) {
     plugins: {
       tooltip: {
         callbacks: {
-          label: function (context: any) {
+          label: function (context: TooltipItem) {
             let label = context.dataset.label || "";
             if (label) label += ": ";
             if (context.parsed.y !== null) label += context.parsed.y + " ppm";

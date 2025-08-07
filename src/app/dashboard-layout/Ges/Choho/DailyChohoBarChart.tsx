@@ -9,6 +9,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { TooltipItem } from "chart.js";
 
 // Register chart components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
@@ -109,7 +110,7 @@ export default function DailyChohoBarChart({ dataSource }: DailyChartProps) {
     plugins: {
       tooltip: {
         callbacks: {
-          label: function (context: any) {
+          label: function (context: TooltipItem<"bar">) {
             let label = context.dataset.label || "";
             if (label) {
               label += ": ";

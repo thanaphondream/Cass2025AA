@@ -85,8 +85,8 @@ export default function HomePage() {
           latestData: latest,
         };
       })
-      .filter((loc: any) => loc.latestData)
-      .sort((a:any, b:any) => new Date(b.latestData.date).getTime() - new Date(a.latestData.date).getTime())
+      .filter((loc: LatestLocation) => loc.latestData)
+      .sort((a: LatestLocation, b: LatestLocation) => new Date(b.latestData.date).getTime() - new Date(a.latestData.date).getTime())
       .slice(0, 4);
 
     setLatestLocations(withLatest);

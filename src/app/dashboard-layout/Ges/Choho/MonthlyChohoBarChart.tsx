@@ -11,6 +11,7 @@ import {
 import { Bar } from "react-chartjs-2";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+import { TooltipItem } from "chart.js";
 
 // เปลี่ยนชื่อ type เป็น ChohoEntry
 type ChohoEntry = {
@@ -108,7 +109,7 @@ export default function MonthlyChohoBarChart({ dataSource }: MonthlyChartProps) 
     plugins: {
       tooltip: {
         callbacks: {
-          label: function (context: any) {
+          label: function (context: TooltipItem) {
             let label = context.dataset.label || "";
             if (label) label += ": ";
             if (context.parsed.y !== null) label += context.parsed.y + " ppm";
