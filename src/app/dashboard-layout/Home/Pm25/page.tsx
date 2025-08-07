@@ -43,7 +43,7 @@ interface Pm10{
     value: number
 }
 
-const page = () => {
+const Page = () => {
     const [pmnow, setPmnom] = useState<Ari4[]>([])
 
     useEffect(() => {
@@ -138,4 +138,4 @@ const page = () => {
 
 }
 
-export default page
+export default Page
