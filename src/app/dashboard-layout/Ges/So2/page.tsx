@@ -61,9 +61,9 @@ const So2_ = () => {
         if (rs_json.length > 0) {
           setSelectedLocationName(rs_json[0].name_location);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching locations:", err);
-        setErrorLocations(`Failed to load locations: ${err.message}`);
+        setErrorLocations(`Failed to load locations: ${err}`);
       } finally {
         setLoadingLocations(false);
       }
@@ -86,9 +86,9 @@ const So2_ = () => {
             const firstDate = new Date(rs_json[0].year, rs_json[0].month - 1, rs_json[0].day);
             setSelectedDate(firstDate);
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error("Error fetching GES data:", err);
-          setErrorGesData(`Failed to load data for ${selectedLocationName}: ${err.message}`);
+          setErrorGesData(`Failed to load data for ${selectedLocationName}`);
           setGesData([]);
           setSelectedDate(null);
         } finally {

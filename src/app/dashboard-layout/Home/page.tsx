@@ -91,7 +91,7 @@ export default function HomePage() {
 
     setLatestLocations(withLatest);
 
-  } catch (err: any) {
+  } catch (err) {
     console.error("Error fetching location data:", err);
     setError("ไม่สามารถโหลดข้อมูลได้ โปรดลองอีกครั้งในภายหลัง");
   } finally {

@@ -62,9 +62,9 @@ const Choho_ = () => {
         if (rs_json.length > 0) {
           setSelectedLocationName(rs_json[0].name_location);
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching locations:", err);
-        setErrorLocations(`Failed to load locations: ${err.message}`);
+        setErrorLocations(`Failed to load locations: ${err}`);
       } finally {
         setLoadingLocations(false);
       }
@@ -90,9 +90,9 @@ const Choho_ = () => {
             const firstDate = new Date(rs_json[0].year, rs_json[0].month - 1, rs_json[0].day);
             setSelectedDate(firstDate);
           }
-        } catch (err: any) {
+        } catch (err) {
           console.error("Error fetching GES (Choho) data for date availability:", err);
-          setErrorGesData(`Failed to load data for ${selectedLocationName}: ${err.message}`);
+          setErrorGesData(`Failed to load data for ${selectedLocationName}: ${err}`);
           setGesData([]);
           setSelectedDate(null);
         } finally {

@@ -64,7 +64,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ locationdata }) => {
   }
 
   return (
-    <MapContainer center={[15, 100]} zoom={5} style={{ height: "100vh", width: "100%" }} attributionControl={false}>
+    <MapContainer center={[15.0, 100.0]} zoom={5} style={{  height: "100%", width: "100%" }} attributionControl={false}>
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {locationdata.map((location) => {
         if (!location.meteorological_id.length) return null;
