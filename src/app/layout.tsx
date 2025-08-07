@@ -1,11 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "ชื่อเว็บไซต์",
-  description: "คำอธิบาย",
-  icons: {
-    icon: "/favicon.ico", 
-  },
+  title: "My App",
+  description: "Next.js App with Global Styles",
 };
 
 export default function RootLayout({
@@ -17,7 +14,6 @@ export default function RootLayout({
     <html lang="en">
       <head />
       <body>{children}</body>
-      <link rel="icon" href="../../public/cass2025.jpg" sizes="any" />
     </html>
   );
 }
