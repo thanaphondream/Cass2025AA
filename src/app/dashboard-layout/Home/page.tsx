@@ -71,7 +71,7 @@ export default function HomePage() {
     setLocationdata(jsondata.Location_find);
 
     const withLatest: LatestLocation[] = jsondata.Location_find
-      .map((loc: any) => {
+      .map((loc: LocationData) => {
         const latest = [...loc.meteorological_id].sort((a, b) => {
           const dateA = new Date(`${a.date}T${String(a.hours).padStart(2, '0')}:00:00`);
           const dateB = new Date(`${b.date}T${String(b.hours).padStart(2, '0')}:00:00`);

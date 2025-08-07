@@ -166,12 +166,19 @@ const Pm25 = () => {
       console.error(err);
     }
   };
+interface CheckTokenModalProps {
+  open: boolean;
+  onClose: () => void;
+  data: Air4[];
+  title: string;
+}
 
-const CheckTokenModal = ({ open, onClose, data, title }: any) => {
+const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) => {
+
   const [tokenValue, setTokenValue] = useState("");
 
   const token = localStorage.getItem("token");
-  const tokenOk = localStorage.getItem("tokenOk");
+  const tokenOk = localStorage.getItem("tokeOk");
 
   const downloadCsv = () => {
     downloadCSV(data, title);
