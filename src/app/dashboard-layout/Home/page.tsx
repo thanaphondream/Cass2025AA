@@ -102,13 +102,13 @@ export default function HomePage() {
     fetchData();
   });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p className="text-xl text-gray-600">กำลังโหลดข้อมูล...</p>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       <p className="text-xl text-gray-600">กำลังโหลดข้อมูล...</p>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (

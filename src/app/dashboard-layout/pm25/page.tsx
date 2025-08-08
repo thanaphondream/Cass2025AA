@@ -298,7 +298,7 @@ const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) =
             </tr>
           </thead>
           <tbody>
-            {data.map((item) => (
+            {data && data.map((item) => (
               <tr key={item.id} className="border-b border-gray-200 hover:bg-blue-50 transition">
                 <td className="py-2 px-4">{`${item.day}/${item.month}/${item.year}`}</td>
                 <td className="py-2 px-4">{item.hours}</td>
@@ -335,7 +335,7 @@ const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) =
               }}
             >
               <option value="">--เลือกสถานที่ตรวจวัด--</option>
-              {locationStation.map((item) => (
+              {locationStation && locationStation.map((item) => (
                 <option key={item.id} value={item.id}>{item.location_name}</option>
               ))}
             </select>
