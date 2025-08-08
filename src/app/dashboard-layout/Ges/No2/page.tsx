@@ -4,9 +4,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import DailyNo2BarChart from "./DailyNo2BarChart";
-import MonthlyNo2BarChart from "./MonthlyNo2BarChart";
-import YearlyNo2BarChart from "./YearlyNo2BarChart";
+// import DailyNo2BarChart from "./DailyNo2BarChart";
+// import MonthlyNo2BarChart from "./MonthlyNo2BarChart";
+// import YearlyNo2BarChart from "./YearlyNo2BarChart";
 
 interface No2 {
   id: number;
@@ -381,7 +381,7 @@ const No2_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <DailyNo2BarChart dataSource={locationShowall} />
+                      {/* <DailyNo2BarChart dataSource={locationShowall} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
@@ -444,7 +444,7 @@ const No2_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <MonthlyNo2BarChart dataSource={locationShowdatamonth} />
+                      {/* <MonthlyNo2BarChart dataSource={locationShowdatamonth} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
@@ -507,7 +507,7 @@ const No2_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <YearlyNo2BarChart dataSource={locationShowdatayaer} />
+                      {/* <YearlyNo2BarChart dataSource={locationShowdatayaer} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">

@@ -5,9 +5,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 // Import the new chart components (YOU NEED TO CREATE THESE FILES)
-import DailyChohoBarChart from "./DailyChohoBarChart";
-import MonthlyChohoBarChart from "./MonthlyChohoBarChart";
-import YearlyChohoBarChart from "./YearlyChohoBarChart";
+// import DailyChohoBarChart from "./DailyChohoBarChart";
+// import MonthlyChohoBarChart from "./MonthlyChohoBarChart";
+// import YearlyChohoBarChart from "./YearlyChohoBarChart";
 
 // Interfaces updated for Choho
 interface Choho {
@@ -393,7 +393,7 @@ const Choho_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <DailyChohoBarChart dataSource={locationShowallChoho} />
+                      {/* <DailyChohoBarChart dataSource={locationShowallChoho} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
@@ -457,7 +457,7 @@ const Choho_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <MonthlyChohoBarChart dataSource={locationShowdatamonthChoho} />
+                      {/* <MonthlyChohoBarChart dataSource={locationShowdatamonthChoho} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
@@ -521,7 +521,7 @@ const Choho_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <YearlyChohoBarChart dataSource={locationShowdatayaerChoho} />
+                      {/* <YearlyChohoBarChart dataSource={locationShowdatayaerChoho} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">

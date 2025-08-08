@@ -5,9 +5,9 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 // Import the new chart components
-import DailySo2BarChart from "./DailySo2BarChart";
-import MonthlySo2BarChart from "./MonthlySo2BarChart";
-import YearlySo2BarChart from "./YearlySo2BarChart";
+// import DailySo2BarChart from "./DailySo2BarChart";
+// import MonthlySo2BarChart from "./MonthlySo2BarChart";
+// import YearlySo2BarChart from "./YearlySo2BarChart";
 
 interface So2 {
   id: number; // Added id for consistency, assuming it exists
@@ -384,7 +384,7 @@ const So2_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <DailySo2BarChart dataSource={locationShowall} />
+                      {/* <DailySo2BarChart dataSource={locationShowall} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
@@ -448,7 +448,7 @@ const So2_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <MonthlySo2BarChart dataSource={locationShowdatamonth} />
+                      {/* <MonthlySo2BarChart dataSource={locationShowdatamonth} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">
@@ -512,7 +512,7 @@ const So2_ = () => {
                 <>
                   {showChart && (
                     <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
-                      <YearlySo2BarChart dataSource={locationShowdatayaer} />
+                      {/* <YearlySo2BarChart dataSource={locationShowdatayaer} /> */}
                     </div>
                   )}
                   <div className="mt-8 p-4 border border-gray-200 rounded-lg shadow-sm bg-white">

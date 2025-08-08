@@ -50,15 +50,15 @@ interface Locations {
 
 const DownloadPage = () => {
   const [locations, setLocations] = useState<Locations[]>([]);
-  const [provincialStation, setProvincialStation] = useState<String>()
+  const [provincialStation, setProvincialStation] = useState<string>()
   const [province, setProvince] = useState<MeteorologicalData[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [pushnamelocation, setPushnamelocation] = useState<String>("")
+  const [pushnamelocation, setPushnamelocation] = useState<string>("")
   const [location_day, setLocation_day] = useState<LocationData[]>([])
   const [location_month, setLocation_month] = useState<LocationData[]>([])
   const [location_year, setLocation_year] = useState<LocationData[]>([])
   const [viewData, setViewData] = useState<Record<number, MeteorologicalData[]>>({});
-  const [idlocation, setIdlocation] = useState<Number>(0)
+  const [idlocation, setIdlocation] = useState<number>(0)
   const [loading, setLoading] = useState(true); 
   const [error, setError] = useState<string | null>(null); 
   const [open, setOpen] = useState(true);
