@@ -50,15 +50,15 @@ interface Locations {
 
 const DownloadPage = () => {
   const [locations, setLocations] = useState<Locations[]>([]);
-  const [provincialStation, setProvincialStation] = useState<String>();
+  const [provincialStation, setProvincialStation] = useState<string>();
   const [province, setProvince] = useState<MeteorologicalData[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [pushnamelocation, setPushnamelocation] = useState<String>("");
+  const [pushnamelocation, setPushnamelocation] = useState<string>("");
   const [location_day, setLocation_day] = useState<LocationData[]>([]);
   const [location_month, setLocation_month] = useState<LocationData[]>([]);
   const [location_year, setLocation_year] = useState<LocationData[]>([]);
   const [viewData, setViewData] = useState<Record<number, MeteorologicalData[]>>({});
-  const [idlocation, setIdlocation] = useState<Number>(0);
+  const [idlocation, setIdlocation] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(true);
@@ -205,7 +205,14 @@ const DownloadPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  const CheckTokenModal = ({ open, onChange, data, tile }: any) => {
+  interface CheckTokenModalProps {
+  open: boolean;
+  onChange:() => void;
+  data: LocationData[];  
+  tile: string;        
+}
+
+  const CheckTokenModal: React.FC<CheckTokenModalProps> = ({ open, onChange, data, tile }) => {
     const [tokenValue, setTokenValue] = useState("");
     const token = localStorage.getItem("token");
     const tokenOk = localStorage.getItem("tokenOk");
@@ -305,7 +312,7 @@ const DownloadPage = () => {
         <button onClick={() => setTockenstatus(prev => !prev)}> Token</button>
         <CheckTokenModal open={tockenstatus} onChange={() => setTockenstatus(false)} data={data} tile={title} />
       </div>
-      {data.map((item) => (
+      {data && data.map((item) => (
         <div key={item.id} className="mb-6 border rounded-lg shadow-md overflow-x-auto">
           <div className="bg-gray-100 p-4">
             <p className="font-semibold">สถานที่: {item.name_location}</p>
@@ -325,7 +332,7 @@ const DownloadPage = () => {
               </tr>
             </thead>
             <tbody>
-              {item.meteorological_id.map((met) => (
+              {item && item.meteorological_id.map((met) => (
                 <tr key={met.id} className="hover:bg-gray-50">
                   <td className="py-2 px-4 border text-center">{met.day}</td>
                   <td className="py-2 px-4 border text-center">{met.highcloud}</td>
@@ -380,7 +387,7 @@ const DownloadPage = () => {
               }}
             >
               <option value="">--เลือกสถานที่ตรวจวัด--</option>
-              {locations.map((location) => (
+              {locations && locations.map((location) => (
                 <option value={location.id} key={location.id}>{location.locationaname}</option>
               ))}
             </select>
