@@ -76,7 +76,7 @@ const DownloadPage = () => {
         const rs = await fetch("https://cass-api-data.vercel.app/api/climatedata");
         const rs_json = await rs.json();
         setLocations(rs_json.data);
-      } catch (err: any) {
+      } catch (err) {
         console.error("Error fetching data:", err);
         setError("ไม่สามารถโหลดข้อมูลได้ โปรดลองอีกครั้งในภายหลัง");
       } finally {
@@ -90,9 +90,9 @@ const DownloadPage = () => {
     try {
       const rs = await fetch(`https://cass-api-data.vercel.app/api/climate/${name_location}`);
       const rs_json = await rs.json();
-      const rs_finond = rs_json.flatMap((m: any) => m.meteorological_id);
+      const rs_finond = rs_json.flatMap((md: LocationData) => md.meteorological_id);
       setProvince(rs_finond);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
     }
   };
