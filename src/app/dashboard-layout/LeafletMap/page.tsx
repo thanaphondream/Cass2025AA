@@ -1,4 +1,3 @@
-// src/app/dashboard-layout/LeafletMap/LeafletMap.tsx
 "use client";
 
 import React from "react";
@@ -32,6 +31,10 @@ interface LocationData {
   meteorological_id: MeteorologicalData[];
 }
 
+interface LeafletMapProps {
+  locationdata: LocationData[];
+}
+
 const RAIN_COLORS = {
   HIGH: "#ff0000",
   MEDIUM: "#ffff00",
@@ -54,17 +57,18 @@ const createCustomIcon = (color: string) =>
     popupAnchor: [0, -32],
   });
 
-interface LeafletMapProps {
-  locationdata: LocationData[];
-}
-
 const LeafletMap: React.FC<LeafletMapProps> = ({ locationdata }) => {
   if (!locationdata || locationdata.length === 0) {
     return <p>ไม่มีข้อมูลแสดงแผนที่</p>;
   }
 
   return (
-    <MapContainer center={[15.0, 100.0]} zoom={5} style={{  height: "100%", width: "100%" }} attributionControl={false}>
+    <MapContainer
+      center={[15.0, 100.0]}
+      zoom={5}
+      style={{ height: "100%", width: "100%" }}
+      attributionControl={false}
+    >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {locationdata.map((location) => {
         if (!location.meteorological_id.length) return null;
