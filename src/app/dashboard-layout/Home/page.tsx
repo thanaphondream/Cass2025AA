@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from 'next/dynamic';
+// import dynamic from 'next/dynamic';
 import Link from "next/link";
 
 interface MeteorologicalData {
@@ -38,10 +38,10 @@ interface LatestLocation {
   latestData: MeteorologicalData;
 }
 
-const LeafletMap = dynamic(() => import('../LeafletMap/page'), { 
-  ssr: false,
-  loading: () => <div className="h-96 flex items-center justify-center bg-gray-100 rounded-lg">กำลังโหลดแผนที่...</div>
-});
+// const LeafletMap = dynamic(() => import('../LeafletMap/page'), { 
+//   ssr: false,
+//   loading: () => <div className="h-96 flex items-center justify-center bg-gray-100 rounded-lg">กำลังโหลดแผนที่...</div>
+// });
 
 export default function HomePage() {
   const router = useRouter();
@@ -136,7 +136,7 @@ export default function HomePage() {
       </h1>
 
       <div className="mb-12 h-96 rounded-lg overflow-hidden shadow-lg">
-        <LeafletMap locationdata={locationdata} />
+        {/* <LeafletMap locationdata={locationdata} /> */}
       </div>
       <div className="mt-10">
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-200 pb-2">
