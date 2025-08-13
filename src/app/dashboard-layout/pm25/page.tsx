@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { FaDownload } from "react-icons/fa"; 
+import { FaDownload, FaEye } from "react-icons/fa"; 
 import {
   Modal,
   Box,
@@ -12,20 +12,6 @@ import {
   Link,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface Location {
   id: number;
@@ -80,14 +66,12 @@ const Pm25 = () => {
   const [dayDataAir4, setDayDataAir4] = useState<Air4[]>([]);
   const [monthDataAir4, setMonthDataAir4] = useState<Air4[]>([]);
   const [yearDataAir4, setYearDataAir4] = useState<Air4[]>([]);
+  const [tokenvalue, setTokenvalue] = useState<string>("");
   const [tockenstatus, setTockenstatus] = useState<boolean>(false);
+  const [open, setOpen] = useState(true);
 
-  // chart data state
-  const [dayChartData, setDayChartData] = useState<any>(null);
-  const [monthChartData, setMonthChartData] = useState<any>(null);
-  const [yearChartData, setYearChartData] = useState<any>(null);
+  const handleClose = () => setOpen(false);
 
-  const handleClose = () => setTockenstatus(false);
 
   const downloadCSV = (data: Air4[], filename: string) => {
     const csvHeader = ["วันที่", "ชั่วโมง", "เขต", "สถานี", "PM2.5", "PM10"];
@@ -124,39 +108,16 @@ const Pm25 = () => {
       }
     };
     fetchData();
-  }, []);
+  });
 
   const api_checkProvince = async (name: string) => {
-    const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm111/${name}`);
+    const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm111/${name}`)
     const rs_json = await rs.json();
+    console.log("Province data fetched:", rs_json);
     setProvince(rs_json);
   };
 
   const availableDates: Date[] = province.map((item) => new Date(item.year, item.month - 1, item.day));
-
-  const prepareChartData = (data: Air4[]) => {
-    const labels = data.map((d) => `${d.day}/${d.month}`);
-    const pm25Values = data.map((d) => d.pm25_id?.[0]?.value ?? null);
-    const pm10Values = data.map((d) => d.pm10_id?.[0]?.value ?? null);
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: "PM2.5",
-          data: pm25Values,
-          borderColor: "rgba(255, 99, 132, 1)",
-          backgroundColor: "rgba(255, 99, 132, 0.2)",
-        },
-        {
-          label: "PM10",
-          data: pm10Values,
-          borderColor: "rgba(54, 162, 235, 1)",
-          backgroundColor: "rgba(54, 162, 235, 0.2)",
-        },
-      ],
-    };
-  };
 
   const Day_dataPm = async () => {
     try {
@@ -166,9 +127,7 @@ const Pm25 = () => {
       }
       const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm/${selectedDate.getFullYear()}/${selectedDate.getMonth() + 1}/${selectedDate.getDate()}/${idlocation}`);
       const rs_json = await rs.json();
-      const dataArray = Array.isArray(rs_json) ? rs_json : [rs_json];
-      setDayDataAir4(dataArray);
-      setDayChartData(prepareChartData(dataArray));
+      setDayDataAir4(rs_json);
       setMonthDataAir4([]);
       setYearDataAir4([]);
     } catch (err) {
@@ -184,9 +143,7 @@ const Pm25 = () => {
       }
       const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm/${selectedDate.getFullYear()}/${selectedDate.getMonth() + 1}/${namelocation}`);
       const rs_json = await rs.json();
-      const dataArray = Array.isArray(rs_json) ? rs_json : [rs_json];
-      setMonthDataAir4(dataArray);
-      setMonthChartData(prepareChartData(dataArray));
+      setMonthDataAir4(rs_json);
       setDayDataAir4([]);
       setYearDataAir4([]);
     } catch (err) {
@@ -202,27 +159,132 @@ const Pm25 = () => {
       }
       const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm/${selectedDate.getFullYear()}/${namelocation}`);
       const rs_json = await rs.json();
-      const dataArray = Array.isArray(rs_json) ? rs_json : [rs_json];
-      setYearDataAir4(dataArray);
-      setYearChartData(prepareChartData(dataArray));
+      setYearDataAir4(rs_json);
       setMonthDataAir4([]);
       setDayDataAir4([]);
     } catch (err) {
       console.error(err);
     }
   };
+interface CheckTokenModalProps {
+  open: boolean;
+  onClose: () => void;
+  data: Air4[];
+  title: string;
+}
+
+const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) => {
+
+  const [tokenValue, setTokenValue] = useState("");
+
+  const token = localStorage.getItem("token");
+  const tokenOk = localStorage.getItem("tokeOk");
+
+  const downloadCsv = () => {
+    downloadCSV(data, title);
+  };
+
+  useEffect(() => {
+    if (open && token && tokenOk === token) {
+      downloadCsv();
+      onClose();
+    }
+  }, [open]);
+
+  const confirmToken = () => {
+    if (!tokenValue) {
+      alert("กรุณาใส่โทเคนก่อนยืนยัน");
+      return;
+    }
+    if (tokenValue !== token) {
+      alert("โทเคนไม่ถูกต้อง");
+      return;
+    }
+    alert("ยืนยันโทเคนสำเร็จ");
+    localStorage.setItem("tokenOk", tokenValue);
+    downloadCsv();
+    onClose();
+  };
+
+  if (!token || tokenOk !== token) {
+    return (
+      <Modal 
+        open={open} 
+        // onClose={onClose}
+        onClose={handleClose}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+        >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "#f3f4f6",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            กรุณาใส่โทเคนเพื่อดาวน์โหลดข้อมูล
+          </Typography>
+
+          <TextField
+            fullWidth
+            value={tokenValue}
+            onChange={(e) => setTokenValue(e.target.value)}
+            placeholder="กรอกโทเคนที่นี่"
+            variant="outlined"
+            size="small"
+            sx={{ mt: 2 }}
+          />
+
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={confirmToken}
+              startIcon={<ContentCopyIcon />}
+            >
+              ยืนยัน
+            </Button>
+          </Box>
+
+          <Box sx={{ mt: 2 }}>
+            <Link href="/login-" underline="hover">
+              ล็อกอิน
+            </Link>
+          </Box>
+        </Box>
+      </Modal>
+    );
+  }
+
+  return null;
+};
 
   const renderStyledTable = (data: Air4[], title: string) => (
     <div className="mt-8">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
       <div className="text-center mb-4">
         <button
-          className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition"
-        >
-          <FaDownload className="inline mr-2" />
-          ดาวน์โหลด CSV
-        </button>
+            className="bg-green-600 text-white px-4 py-2 rounded"
+            onClick={() => setTockenstatus(prev => !prev)}
+          >
+            <FaDownload className="inline mr-2" />
+            {tockenstatus ? "ปิด" : "ดาวน์โหลดข้อมูล"}
+          </button>
+
+          <CheckTokenModal
+            open={tockenstatus}
+            onClose={() => setTockenstatus(false)}
+            data={data}
+            title={title}
+          />
       </div>
-      <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
       <div className="overflow-x-auto rounded-lg shadow-md border border-gray-300 mt-4">
         <table className="min-w-full bg-white text-left text-sm">
           <thead className="bg-blue-100 text-gray-700 uppercase text-xs font-semibold">
@@ -318,26 +380,9 @@ const Pm25 = () => {
           </button>
         </div>
 
-        {dayDataAir4.length > 0 && (
-          <>
-            {renderStyledTable(dayDataAir4, "ข้อมูลรายวัน")}
-            {dayChartData && <Line data={dayChartData} />}
-          </>
-        )}
-
-        {monthDataAir4.length > 0 && (
-          <>
-            {renderStyledTable(monthDataAir4, "ข้อมูลรายเดือน")}
-            {monthChartData && <Line data={monthChartData} />}
-          </>
-        )}
-
-        {yearDataAir4.length > 0 && (
-          <>
-            {renderStyledTable(yearDataAir4, "ข้อมูลรายปี")}
-            {yearChartData && <Line data={yearChartData} />}
-          </>
-        )}
+        {dayDataAir4.length > 0 && renderStyledTable(dayDataAir4, "ข้อมูลรายวัน")}
+        {monthDataAir4.length > 0 && renderStyledTable(monthDataAir4, "ข้อมูลรายเดือน")}
+        {yearDataAir4.length > 0 && renderStyledTable(yearDataAir4, "ข้อมูลรายปี")}
       </div>
     </div>
   );
