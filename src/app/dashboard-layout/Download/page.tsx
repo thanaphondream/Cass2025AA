@@ -212,89 +212,89 @@ const DownloadPage = () => {
   tile: string;        
 }
 
-  const CheckTokenModal: React.FC<CheckTokenModalProps> = ({ open, onChange, data, tile }) => {
-    const [tokenValue, setTokenValue] = useState("");
-    const token = localStorage.getItem("token");
-    const tokenOk = localStorage.getItem("tokenOk");
+  // const CheckTokenModal: React.FC<CheckTokenModalProps> = ({ open, onChange, data, tile }) => {
+  //   const [tokenValue, setTokenValue] = useState("");
+  //   const token = localStorage.getItem("token");
+  //   const tokenOk = localStorage.getItem("tokenOk");
 
-    useEffect(() => {
-      if (open && token && tokenOk === token) {
-        downloadCSV(data, tile);
-        onChange();
-      }
-    }, [open]);
+  //   useEffect(() => {
+  //     if (open && token && tokenOk === token) {
+  //       downloadCSV(data, tile);
+  //       onChange();
+  //     }
+  //   }, [open]);
 
-    const token_api = async (tokenValue: string) => {
-      try {
-        const rs = await fetch(`http://localhost:3005/api/user-token/${tokenValue}`);
-        const rs_json = await rs.json();
-        if (rs_json.status === "success") {
-          alert("โทเคนถูกต้อง");
-          localStorage.setItem("token", tokenValue);
-          localStorage.setItem("tokenOk", tokenValue);
-          downloadCSV(data, tile);
-          onChange();
-        }
-      } catch (err) {
-        console.error("Error fetching token:", err);
-      }
-    };
+  //   const token_api = async (tokenValue: string) => {
+  //     try {
+  //       const rs = await fetch(`http://localhost:3005/api/user-token/${tokenValue}`);
+  //       const rs_json = await rs.json();
+  //       if (rs_json.status === "success") {
+  //         alert("โทเคนถูกต้อง");
+  //         localStorage.setItem("token", tokenValue);
+  //         localStorage.setItem("tokenOk", tokenValue);
+  //         downloadCSV(data, tile);
+  //         onChange();
+  //       }
+  //     } catch (err) {
+  //       console.error("Error fetching token:", err);
+  //     }
+  //   };
 
-    const confirmToken = () => {
-      if (!tokenValue) {
-        alert("กรุณาใส่โทเคนก่อนยืนยัน");
-        return;
-      }
-      if (tokenValue !== token) {
-        if (!token) {
-          token_api(tokenValue);
-        } else {
-          alert("โทเคนไม่ถูกต้อง");
-          return;
-        }
-      }
-      alert("ยืนยันโทเคนสำเร็จ");
-      localStorage.setItem("token", tokenValue);
-      localStorage.setItem("tokenOk", tokenValue);
-      downloadCSV(data, tile);
-    };
+  //   const confirmToken = () => {
+  //     if (!tokenValue) {
+  //       alert("กรุณาใส่โทเคนก่อนยืนยัน");
+  //       return;
+  //     }
+  //     if (tokenValue !== token) {
+  //       if (!token) {
+  //         token_api(tokenValue);
+  //       } else {
+  //         alert("โทเคนไม่ถูกต้อง");
+  //         return;
+  //       }
+  //     }
+  //     alert("ยืนยันโทเคนสำเร็จ");
+  //     localStorage.setItem("token", tokenValue);
+  //     localStorage.setItem("tokenOk", tokenValue);
+  //     downloadCSV(data, tile);
+  //   };
 
-    return (
-      <Modal open={open} onClose={onChange}>
-        <Box sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "#f3f4f6",
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2,
-        }}>
-          <Typography variant="h6" gutterBottom>กรุณาใส่โทเคนเพื่อดาวน์โหลดข้อมูล</Typography>
-          <TextField
-            fullWidth
-            value={tokenValue}
-            onChange={(e) => setTokenValue(e.target.value)}
-            placeholder="กรอกโทเคนที่นี่"
-            variant="outlined"
-            size="small"
-            sx={{ mt: 2 }}
-          />
-          <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
-            <Button variant="outlined" color="secondary" onClick={onChange}>ออก</Button>
-            <Button variant="contained" color="primary" startIcon={<ContentCopyIcon />} onClick={confirmToken}>
-              ยืนยัน
-            </Button>
-          </Box>
-          <Box sx={{ mt: 2 }}>
-            <Link href="/login-" underline="hover">ล็อกอิน</Link>
-          </Box>
-        </Box>
-      </Modal>
-    );
-  };
+  //   return (
+  //     <Modal open={open} onClose={onChange}>
+  //       <Box sx={{
+  //         position: "absolute",
+  //         top: "50%",
+  //         left: "50%",
+  //         transform: "translate(-50%, -50%)",
+  //         width: 400,
+  //         bgcolor: "#f3f4f6",
+  //         boxShadow: 24,
+  //         p: 4,
+  //         borderRadius: 2,
+  //       }}>
+  //         <Typography variant="h6" gutterBottom>กรุณาใส่โทเคนเพื่อดาวน์โหลดข้อมูล</Typography>
+  //         <TextField
+  //           fullWidth
+  //           value={tokenValue}
+  //           onChange={(e) => setTokenValue(e.target.value)}
+  //           placeholder="กรอกโทเคนที่นี่"
+  //           variant="outlined"
+  //           size="small"
+  //           sx={{ mt: 2 }}
+  //         />
+  //         <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
+  //           <Button variant="outlined" color="secondary" onClick={onChange}>ออก</Button>
+  //           <Button variant="contained" color="primary" startIcon={<ContentCopyIcon />} onClick={confirmToken}>
+  //             ยืนยัน
+  //           </Button>
+  //         </Box>
+  //         <Box sx={{ mt: 2 }}>
+  //           <Link href="/login-" underline="hover">ล็อกอิน</Link>
+  //         </Box>
+  //       </Box>
+  //     </Modal>
+  //   );
+  // };
 
   const renderStyledTable = (data: LocationData[], title: string) => (
     <div className="my-8">
@@ -310,7 +310,7 @@ const DownloadPage = () => {
       </div>
       <div>
         <button onClick={() => setTockenstatus(prev => !prev)}> Token</button>
-        <CheckTokenModal open={tockenstatus} onChange={() => setTockenstatus(false)} data={data} tile={title} />
+        {/* <CheckTokenModal open={tockenstatus} onChange={() => setTockenstatus(false)} data={data} tile={title} /> */}
       </div>
       {data && data.map((item) => (
         <div key={item.id} className="mb-6 border rounded-lg shadow-md overflow-x-auto">

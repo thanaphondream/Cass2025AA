@@ -166,105 +166,105 @@ const Pm25 = () => {
       console.error(err);
     }
   };
-interface CheckTokenModalProps {
-  open: boolean;
-  onClose: () => void;
-  data: Air4[];
-  title: string;
-}
+// interface CheckTokenModalProps {
+//   open: boolean;
+//   onClose: () => void;
+//   data: Air4[];
+//   title: string;
+// }
 
-const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) => {
+// const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) => {
 
-  const [tokenValue, setTokenValue] = useState("");
+//   const [tokenValue, setTokenValue] = useState("");
 
-  const token = localStorage.getItem("token");
-  const tokenOk = localStorage.getItem("tokeOk");
+//   const token = localStorage.getItem("token");
+//   const tokenOk = localStorage.getItem("tokeOk");
 
-  const downloadCsv = () => {
-    downloadCSV(data, title);
-  };
+//   const downloadCsv = () => {
+//     downloadCSV(data, title);
+//   };
 
-  useEffect(() => {
-    if (open && token && tokenOk === token) {
-      downloadCsv();
-      onClose();
-    }
-  }, [open]);
+//   useEffect(() => {
+//     if (open && token && tokenOk === token) {
+//       downloadCsv();
+//       onClose();
+//     }
+//   }, [open]);
 
-  const confirmToken = () => {
-    if (!tokenValue) {
-      alert("กรุณาใส่โทเคนก่อนยืนยัน");
-      return;
-    }
-    if (tokenValue !== token) {
-      alert("โทเคนไม่ถูกต้อง");
-      return;
-    }
-    alert("ยืนยันโทเคนสำเร็จ");
-    localStorage.setItem("tokenOk", tokenValue);
-    downloadCsv();
-    onClose();
-  };
+//   const confirmToken = () => {
+//     if (!tokenValue) {
+//       alert("กรุณาใส่โทเคนก่อนยืนยัน");
+//       return;
+//     }
+//     if (tokenValue !== token) {
+//       alert("โทเคนไม่ถูกต้อง");
+//       return;
+//     }
+//     alert("ยืนยันโทเคนสำเร็จ");
+//     localStorage.setItem("tokenOk", tokenValue);
+//     downloadCsv();
+//     onClose();
+//   };
 
-  if (!token || tokenOk !== token) {
-    return (
-      <Modal 
-        open={open} 
-        // onClose={onClose}
-        onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-        >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "#f3f4f6",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            กรุณาใส่โทเคนเพื่อดาวน์โหลดข้อมูล
-          </Typography>
+//   if (!token || tokenOk !== token) {
+//     return (
+//       <Modal 
+//         open={open} 
+//         // onClose={onClose}
+//         onClose={handleClose}
+//         aria-labelledby="modal-title"
+//         aria-describedby="modal-description"
+//         >
+//         <Box
+//           sx={{
+//             position: "absolute",
+//             top: "50%",
+//             left: "50%",
+//             transform: "translate(-50%, -50%)",
+//             width: 400,
+//             bgcolor: "#f3f4f6",
+//             boxShadow: 24,
+//             p: 4,
+//             borderRadius: 2,
+//           }}
+//         >
+//           <Typography variant="h6" gutterBottom>
+//             กรุณาใส่โทเคนเพื่อดาวน์โหลดข้อมูล
+//           </Typography>
 
-          <TextField
-            fullWidth
-            value={tokenValue}
-            onChange={(e) => setTokenValue(e.target.value)}
-            placeholder="กรอกโทเคนที่นี่"
-            variant="outlined"
-            size="small"
-            sx={{ mt: 2 }}
-          />
+//           <TextField
+//             fullWidth
+//             value={tokenValue}
+//             onChange={(e) => setTokenValue(e.target.value)}
+//             placeholder="กรอกโทเคนที่นี่"
+//             variant="outlined"
+//             size="small"
+//             sx={{ mt: 2 }}
+//           />
 
-          <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={confirmToken}
-              startIcon={<ContentCopyIcon />}
-            >
-              ยืนยัน
-            </Button>
-          </Box>
+//           <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
+//             <Button
+//               variant="contained"
+//               color="primary"
+//               onClick={confirmToken}
+//               startIcon={<ContentCopyIcon />}
+//             >
+//               ยืนยัน
+//             </Button>
+//           </Box>
 
-          <Box sx={{ mt: 2 }}>
-            <Link href="/login-" underline="hover">
-              ล็อกอิน
-            </Link>
-          </Box>
-        </Box>
-      </Modal>
-    );
-  }
+//           <Box sx={{ mt: 2 }}>
+//             <Link href="/login-" underline="hover">
+//               ล็อกอิน
+//             </Link>
+//           </Box>
+//         </Box>
+//       </Modal>
+//     );
+//   }
 
-  return null;
-};
+//   return null;
+// };
 
   const renderStyledTable = (data: Air4[], title: string) => (
     <div className="mt-8">
@@ -277,13 +277,13 @@ const CheckTokenModal = ({ open, onClose, data, title }: CheckTokenModalProps) =
             <FaDownload className="inline mr-2" />
             {tockenstatus ? "ปิด" : "ดาวน์โหลดข้อมูล"}
           </button>
-
+{/* 
           <CheckTokenModal
             open={tockenstatus}
             onClose={() => setTockenstatus(false)}
             data={data}
             title={title}
-          />
+          /> */}
       </div>
       <div className="overflow-x-auto rounded-lg shadow-md border border-gray-300 mt-4">
         <table className="min-w-full bg-white text-left text-sm">
