@@ -38,6 +38,9 @@ const createCustomIcon = (color: string) =>
   });
 
 export default function LeafletPmMap({ data }: { data: Ari4[] }) {
+  // ป้องกัน SSR render
+  if (typeof window === "undefined") return null;
+
   return (
     <MapContainer
       center={[15.0, 100.0]}
@@ -59,7 +62,10 @@ export default function LeafletPmMap({ data }: { data: Ari4[] }) {
         return (
           <Marker
             key={item.id}
-            position={[parseFloat(item.lat as string), parseFloat(item.long as string)]}
+            position={[
+              parseFloat(item.lat as string),
+              parseFloat(item.long as string),
+            ]}
             icon={icon}
           >
             <Popup>
