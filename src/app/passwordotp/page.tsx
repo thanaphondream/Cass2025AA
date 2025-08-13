@@ -19,9 +19,13 @@ const PasswordOTP = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isVerified, setIsVerified] = useState<boolean>(false);
 
-  useEffect(() => {
-    setPassword(sessionStorage.getItem("password"));
-  });
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const savedPassword = sessionStorage.getItem("password");
+    setPassword(savedPassword);
+  }
+}, []);
+
 
   useEffect(() => {
     if (cooldown === 0) return;
