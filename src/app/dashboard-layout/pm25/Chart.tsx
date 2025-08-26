@@ -11,6 +11,8 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
+  ChartOptions,
 } from "chart.js";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -56,12 +58,12 @@ interface DailyStat {
 }
 
 const Chart: React.FC<ChartProps> = ({ data1 }) => {
-  const [chartData, setChartData] = useState<any>(null);
+  const [chartData, setChartData] = useState<ChartData<"line", number[], string> | null>(null);
   const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
   const [showMin, setShowMin] = useState(false);
   const [showMax, setShowMax] = useState(false);
 
-  // ✅ คำนวณค่าเฉลี่ย Min Max ตามวัน
+  // คำนวณค่าเฉลี่ย Min Max ตามวัน
   useEffect(() => {
     if (!data1 || data1.length === 0) return;
 
@@ -84,7 +86,6 @@ const Chart: React.FC<ChartProps> = ({ data1 }) => {
 
     setDailyStats(stats);
 
-    // Default Chart (เฉลี่ย)
     const labels = stats.map((s) => s.date);
     const avgValues = stats.map((s) => s.avg);
 
@@ -102,12 +103,13 @@ const Chart: React.FC<ChartProps> = ({ data1 }) => {
     });
   }, [data1]);
 
-  // ✅ Update Chart เมื่อกดปุ่ม
+  // Update Chart เมื่อกดปุ่ม
   useEffect(() => {
     if (!dailyStats.length) return;
 
     const labels = dailyStats.map((s) => s.date);
-    const datasets: any[] = [
+
+    const datasets: ChartData<"line", number[], string>["datasets"] = [
       {
         label: "ค่าเฉลี่ย",
         data: dailyStats.map((s) => s.avg),
@@ -142,7 +144,7 @@ const Chart: React.FC<ChartProps> = ({ data1 }) => {
     setChartData({ labels, datasets });
   }, [showMin, showMax, dailyStats]);
 
-  const options = {
+  const options: ChartOptions<"line"> = {
     responsive: true,
     plugins: { legend: { display: true } },
   };

@@ -54,8 +54,19 @@ interface ClimateChartProps {
   meteorologicalData: LocationData[];
 }
 
+interface ChartDataSet {
+  labels: string[];
+  datasets: {
+    label: string;
+    data: number[];
+    borderColor: string;
+    backgroundColor: string;
+    tension: number;
+  }[];
+}
+
 const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
-  const [chartData, setChartData] = useState<{ labels: string[]; datasets: any[] } | null>(null);
+  const [chartData, setChartData] = useState<ChartDataSet | null>(null);
   const [selectedMetric, setSelectedMetric] = useState<Metric>("temperature");
   const [metricsData, setMetricsData] = useState<DailyStats[] | null>(null);
   const [showMinMax, setShowMinMax] = useState(false);
