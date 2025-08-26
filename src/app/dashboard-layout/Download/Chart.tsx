@@ -15,19 +15,33 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-// ---------------- Types ----------------
-interface MeteorologicalRecord {
-  day: number;
-  month: number;
+interface MeteorologicalData {
+  id: number;
   year: number;
-  temperaturde: number; // หรือเปลี่ยนเป็น temperature ถ้าต้องการ
+  month: number;
+  day: number;
+  hours: number;
+  temperaturde: number;
   humidity: number;
+  slp: number;
   rain: number;
+  windspeed10m: number;
+  winddirdedtion10m: number;
+  lowcloud: number;
+  highcloud: number;
+  date: string;
 }
 
 interface LocationData {
-  meteorological_id: MeteorologicalRecord[];
+  id: number;
+  name_location: string;
+  latitude: number;
+  longitude: number;
+  date: string;
+  meteorological_id: MeteorologicalData[];
 }
+
+type Metric = "temperature" | "humidity" | "rain";
 
 interface DailyStats {
   date: string;
@@ -40,46 +54,44 @@ interface ClimateChartProps {
   meteorologicalData: LocationData[];
 }
 
-// ---------------- Helper ----------------
-const average = (arr: number[]) => (arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
-
-// ---------------- Component ----------------
 const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
   const [chartData, setChartData] = useState<{ labels: string[]; datasets: any[] } | null>(null);
+  const [selectedMetric, setSelectedMetric] = useState<Metric>("temperature");
   const [metricsData, setMetricsData] = useState<DailyStats[] | null>(null);
-  const [selectedMetric, setSelectedMetric] = useState<"temperature" | "humidity" | "rain">("temperature");
   const [showMinMax, setShowMinMax] = useState(false);
 
-  // ---------------- Process Data ----------------
   useEffect(() => {
-    const allRecords: MeteorologicalRecord[] = meteorologicalData.flatMap(
-      (loc) => loc.meteorological_id
-    );
+    const fetchData = () => {
+      const allRecords = meteorologicalData.flatMap(loc => loc.meteorological_id);
 
-    const grouped: Record<string, MeteorologicalRecord[]> = {};
-    allRecords.forEach((item) => {
-      const key = `${item.day}/${item.month}/${item.year}`;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(item);
-    });
+      const grouped: Record<string, MeteorologicalData[]> = {};
+      allRecords.forEach(item => {
+        const key = `${item.day}/${item.month}/${item.year}`;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(item);
+      });
 
-    const dailyStats: DailyStats[] = Object.entries(grouped).map(([date, items]) => {
-      const temps = items.map(i => i.temperaturde);
-      const hums = items.map(i => i.humidity);
-      const rains = items.map(i => i.rain);
+      const dailyStats: DailyStats[] = Object.entries(grouped).map(([date, items]) => {
+        const temps = items.map(i => i.temperaturde);
+        const hums = items.map(i => i.humidity);
+        const rains = items.map(i => i.rain);
 
-      return {
-        date,
-        temperature: { avg: average(temps), min: Math.min(...temps), max: Math.max(...temps) },
-        humidity: { avg: average(hums), min: Math.min(...hums), max: Math.max(hums) },
-        rain: { avg: average(rains), min: Math.min(...rains), max: Math.max(...rains) },
-      };
-    });
+        return {
+          date,
+          temperature: { avg: average(temps), min: Math.min(...temps), max: Math.max(...temps) },
+          humidity: { avg: average(hums), min: Math.min(...hums), max: Math.max(...hums) },
+          rain: { avg: average(rains), min: Math.min(...rains), max: Math.max(...rains) },
+        };
+      });
 
-    setMetricsData(dailyStats);
+      setMetricsData(dailyStats);
+    };
+
+    fetchData();
   }, [meteorologicalData]);
 
-  // ---------------- Update Chart ----------------
+  const average = (arr: number[]) => (arr.length > 0 ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
+
   useEffect(() => {
     if (!metricsData) return;
 
@@ -95,7 +107,6 @@ const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
         borderColor: "rgba(0, 150, 255, 1)",
         backgroundColor: "rgba(0,150,255,0.3)",
         tension: 0.3,
-        pointRadius: 3,
       },
     ];
 
@@ -107,7 +118,6 @@ const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
           borderColor: "green",
           backgroundColor: "rgba(0,255,0,0.3)",
           tension: 0.3,
-          pointRadius: 3,
         },
         {
           label: `${selectedMetric.toUpperCase()} (max)`,
@@ -115,7 +125,6 @@ const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
           borderColor: "red",
           backgroundColor: "rgba(255,0,0,0.3)",
           tension: 0.3,
-          pointRadius: 3,
         }
       );
     }
@@ -123,13 +132,8 @@ const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
     setChartData({ labels, datasets });
   }, [selectedMetric, metricsData, showMinMax]);
 
-  const options = {
-    responsive: true,
-    plugins: { legend: { display: true } },
-    scales: { y: { beginAtZero: false } },
-  };
+  const options = { responsive: true, plugins: { legend: { display: true } } };
 
-  // ---------------- Render ----------------
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Climate Data</h2>
@@ -144,7 +148,10 @@ const Chart: React.FC<ClimateChartProps> = ({ meteorologicalData }) => {
         <button onClick={() => setSelectedMetric("rain")} className="px-3 py-1 bg-purple-500 text-white rounded">
           ปริมาณฝน
         </button>
-        <button onClick={() => setShowMinMax(!showMinMax)} className="px-3 py-1 bg-gray-500 text-white rounded">
+        <button
+          onClick={() => setShowMinMax(!showMinMax)}
+          className="px-3 py-1 bg-gray-500 text-white rounded"
+        >
           {showMinMax ? "ซ่อน Min/Max" : "แสดง Min/Max"}
         </button>
       </div>
