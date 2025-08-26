@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -14,16 +13,7 @@ import {
   Legend,
 } from "chart.js";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
-
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 interface Pm25 {
   id: number;
@@ -39,13 +29,6 @@ interface Pm10 {
   value: number;
 }
 
-interface Location {
-  id: number;
-  name_location: string;
-  date: Date;
-  air4: Air4[];
-}
-
 interface Air4 {
   id: number;
   year: number;
@@ -59,124 +42,109 @@ interface Air4 {
   stationType: string;
   pm25_id: Pm25[];
   pm10_id: Pm10[];
-  location_id: Location[];
 }
 
 interface ChartProps {
   data1: Air4[];
 }
 
+interface DailyStat {
+  date: string;
+  min: number;
+  max: number;
+  avg: number;
+}
+
 const Chart: React.FC<ChartProps> = ({ data1 }) => {
-  
   const [chartData, setChartData] = useState<any>(null);
-  const [dailyStats, setDailyStats] = useState<any[]>([]);
-  const [showMin, setShowMin] = useState<boolean>(false);
-  const [showMax, setShowMax] = useState<boolean>(false);
+  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
+  const [showMin, setShowMin] = useState(false);
+  const [showMax, setShowMax] = useState(false);
 
+  // ✅ คำนวณค่าเฉลี่ย Min Max ตามวัน
   useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch("http://10.90.1.118:3001/api/airpm/2025/8/Bangna");
-      const data = await res.json();
+    if (!data1 || data1.length === 0) return;
 
-      // ✅ Group ข้อมูลตามวัน
-      const grouped: Record<string, number[]> = {};
-      data1.forEach((item: any) => {
-        const key = `${item.day}/${item.month}/${item.year}`;
-        const pmValue = item.pm25_id.length > 0 ? item.pm25_id[0].value : null;
-        if (pmValue === null) return;
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(pmValue);
-      });
+    const grouped: Record<string, number[]> = {};
 
-      // ✅ คำนวณ Min/Max และ Avg
-      const stats = Object.entries(grouped).map(([date, values]) => ({
-        date,
-        min: Math.min(...values),
-        max: Math.max(...values),
-        avg: values.reduce((sum, val) => sum + val, 0) / values.length,
-      }));
-      setDailyStats(stats);
+    data1.forEach((item) => {
+      const key = `${item.day}/${item.month}/${item.year}`;
+      const pmValue = item.pm25_id.length > 0 ? item.pm25_id[0].value : null;
+      if (pmValue === null) return;
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(pmValue);
+    });
 
-      // ✅ Default Chart = Average
-      const labels = stats.map((s) => s.date);
-      const avgValues = stats.map((s) => s.avg);
+    const stats: DailyStat[] = Object.entries(grouped).map(([date, values]) => ({
+      date,
+      min: Math.min(...values),
+      max: Math.max(...values),
+      avg: values.reduce((sum, v) => sum + v, 0) / values.length,
+    }));
 
-      setChartData({
-        labels,
-        datasets: [
-          {
-            label: "ค่าเฉลี่ย",
-            data: avgValues,
-            borderColor: "rgba(0, 170, 255, 1)",
-            backgroundColor: "rgba(0, 170, 255, 0.3)",
-            tension: 0.4,
-            pointRadius: 4,
-          },
-        ],
-      });
-    };
+    setDailyStats(stats);
 
-    fetchData();
-  }, []);
+    // Default Chart (เฉลี่ย)
+    const labels = stats.map((s) => s.date);
+    const avgValues = stats.map((s) => s.avg);
 
-  const updateChart = () => {
+    setChartData({
+      labels,
+      datasets: [
+        {
+          label: "ค่าเฉลี่ย",
+          data: avgValues,
+          borderColor: "rgba(0, 170, 255, 1)",
+          backgroundColor: "rgba(0, 170, 255, 0.3)",
+          tension: 0.4,
+        },
+      ],
+    });
+  }, [data1]);
+
+  // ✅ Update Chart เมื่อกดปุ่ม
+  useEffect(() => {
     if (!dailyStats.length) return;
 
     const labels = dailyStats.map((s) => s.date);
-    const avgValues = dailyStats.map((s) => s.avg);
-    const minValues = dailyStats.map((s) => s.min);
-    const maxValues = dailyStats.map((s) => s.max);
-
     const datasets: any[] = [
       {
         label: "ค่าเฉลี่ย",
-        data: avgValues,
+        data: dailyStats.map((s) => s.avg),
         borderColor: "rgba(0, 170, 255, 1)",
         backgroundColor: "rgba(0, 170, 255, 0.3)",
         tension: 0.4,
-        pointRadius: 4,
       },
     ];
 
     if (showMin) {
       datasets.push({
         label: "ค่าต่ำสุด",
-        data: minValues,
+        data: dailyStats.map((s) => s.min),
         borderColor: "rgba(0, 200, 100, 1)",
         backgroundColor: "rgba(0, 200, 100, 0.3)",
-        borderDash: [5, 5], // เส้นประ
+        borderDash: [5, 5],
         tension: 0.4,
-        pointRadius: 4,
       });
     }
 
     if (showMax) {
       datasets.push({
         label: "ค่าสูงสุด",
-        data: maxValues,
+        data: dailyStats.map((s) => s.max),
         borderColor: "rgba(255, 99, 132, 1)",
         backgroundColor: "rgba(255, 99, 132, 0.3)",
-        borderDash: [5, 5], // เส้นประ
+        borderDash: [5, 5],
         tension: 0.4,
-        pointRadius: 4,
       });
     }
 
     setChartData({ labels, datasets });
-  };
-
-  useEffect(updateChart, [showMin, showMax, dailyStats]);
+  }, [showMin, showMax, dailyStats]);
 
   const options = {
     responsive: true,
-    plugins: {
-      legend: { display: true },
-    },
-    scales: {
-      y: {
-        beginAtZero: false,
-      },
-    },
+    plugins: { legend: { display: true } },
   };
 
   return (
@@ -185,17 +153,13 @@ const Chart: React.FC<ChartProps> = ({ data1 }) => {
       <div className="flex gap-4 mb-4">
         <button
           onClick={() => setShowMin((prev) => !prev)}
-          className={`px-4 py-2 rounded ${
-            showMin ? "bg-green-500 text-white" : "bg-gray-200"
-          }`}
+          className={`px-4 py-2 rounded ${showMin ? "bg-green-500 text-white" : "bg-gray-200"}`}
         >
           {showMin ? "ซ่อน Min" : "แสดง Min"}
         </button>
         <button
           onClick={() => setShowMax((prev) => !prev)}
-          className={`px-4 py-2 rounded ${
-            showMax ? "bg-red-500 text-white" : "bg-gray-200"
-          }`}
+          className={`px-4 py-2 rounded ${showMax ? "bg-red-500 text-white" : "bg-gray-200"}`}
         >
           {showMax ? "ซ่อน Max" : "แสดง Max"}
         </button>
