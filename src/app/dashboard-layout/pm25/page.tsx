@@ -13,6 +13,8 @@ import {
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
+import Chart from "./Chart";
+
 interface Location {
   id: number;
   name_location: string;
@@ -108,7 +110,7 @@ const Pm25 = () => {
       }
     };
     fetchData();
-  });
+  },[]);
 
   const api_checkProvince = async (name: string) => {
     const rs = await fetch(`https://cass-api-data.vercel.app/api/airpm111/${name}`)
@@ -269,7 +271,7 @@ const Pm25 = () => {
   const renderStyledTable = (data: Air4[], title: string) => (
     <div className="mt-8">
       <h2 className="text-xl font-bold text-gray-800 mb-4">{title}</h2>
-      <div className="text-center mb-4">
+            <div className="text-right mb-4">
         <button
             className="bg-green-600 text-white px-4 py-2 rounded"
             onClick={() => setTockenstatus(prev => !prev)}
@@ -284,6 +286,9 @@ const Pm25 = () => {
             data={data}
             title={title}
           /> */}
+      </div>
+      <div>
+        <Chart data1={data} />
       </div>
       <div className="overflow-x-auto rounded-lg shadow-md border border-gray-300 mt-4">
         <table className="min-w-full bg-white text-left text-sm">

@@ -1,6 +1,138 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+// import { Line } from "react-chartjs-2";
+// import {
+//   Chart as ChartJS,
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend,
+// } from "chart.js";
+
+// ChartJS.register(
+//   CategoryScale,
+//   LinearScale,
+//   PointElement,
+//   LineElement,
+//   Title,
+//   Tooltip,
+//   Legend
+// );
+
+// export default function AirChartPM25() {
+//   const [chartData, setChartData] = useState<any>(null);
+//   const [Maxpm25, setMaxpm25] = useState<number>(0);
+//   const [Minpm25, setMinpm25] = useState<number>(Infinity);
+//   const [chartMoth, setChartMonth] = useState<any>(null);
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       const res = await fetch("http://10.90.1.118:3001/api/airpm/2025/8/12/2");
+//       const data = await res.json();
+
+//       const labels = data.map((item: any) => `${item.hours}:00`);
+
+//       const pm25 = data.map((item: any) =>
+//         item.pm25_id.length > 0 ? item.pm25_id[0].value : null
+//       );
+
+//       console.log(pm25, labels)
+
+//       const pmMax = pm25.reduce((max: number, value: number | null) => {
+//         if (value !== null && value > max) { 
+//           return value;
+//         }
+//         return max;
+//       }, 0);
+
+//       setMaxpm25(pmMax);
+//       setMinpm25(pm25.reduce((min: number, value: number | null) => {
+//         if (value !== null && value < min) {
+//           return value;
+//         }
+//         return min;
+//       }, Infinity));
+
+//     // const pmMin = pm25.reduce((min: number, value: number | null) => {
+//     //   if (value !== null && value < min) {
+//     //     return value;
+//     //   }
+//     //   return min;
+//     // }, Infinity);
+
+
+//       setChartData({
+//         labels,
+//         datasets: [
+//           {
+//             label: "PM2.5",
+//             data: pm25,
+//             borderColor: "rgba(0, 170, 255, 1)",       // สีฟ้าเหมือนรูป
+//             backgroundColor: "rgba(0, 170, 255, 0.3)", // สีฟ้าอ่อนโปร่ง
+//             tension: 0.4, 
+//             pointRadius: 5, 
+//             fill: false,
+//           },
+//         ],
+//       });
+
+//       setChartMonth({
+//         labels,
+//         datasets: [
+//           {
+//             label: "PM2.5",
+//             data: pm25,
+//             borderColor: "rgba(0, 150, 255, 1)",       // สีฟ้าเหมือนรูป
+//             backgroundColor: "rgba(0, 150, 255, 0.3)", // สีฟ้าอ่อนโปร่ง
+//             tension: 0.4, 
+//             pointRadius: 5, 
+//             fill: false,
+//           },
+//         ],
+//     })
+//     };
+
+
+//     fetchData();
+//   }, []);
+
+//   const options = {
+//     responsive: true,
+//     plugins: {
+//       legend: { display: false }, 
+//     },
+//     scales: {
+//       y: {
+//         min: Minpm25 - 1,
+//         max: Maxpm25 + 1, 
+//         ticks: {
+//           stepSize: 1,
+//         },
+//       },
+//     },
+//   };
+
+
+
+//   return (
+//     <div className="p-4">
+//       <h2 className="text-xl font-bold mb-4">Bangna PM2.5</h2>
+//       {chartData ? (
+//         <Line data={chartData} options={options} />
+//       ) : (
+//         <p>Loading...</p>
+//       )}
+//     </div>
+//   );
+// }
+
+
 "use client";
 
-import React from "react";
 import { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import {
@@ -24,50 +156,7 @@ ChartJS.register(
   Legend
 );
 
-
-interface Pm25 {
-  id: number;
-  color_id: number;
-  aqi: number;
-  value: number;
-}
-
-interface Pm10 {
-  id: number;
-  color_id: number;
-  aqi: number;
-  value: number;
-}
-
-interface Location {
-  id: number;
-  name_location: string;
-  date: Date;
-  air4: Air4[];
-}
-
-interface Air4 {
-  id: number;
-  year: number;
-  month: number;
-  day: number;
-  hours: number;
-  createAt: Date;
-  area: string;
-  nameTH: string;
-  nameEN: string;
-  stationType: string;
-  pm25_id: Pm25[];
-  pm10_id: Pm10[];
-  location_id: Location[];
-}
-
-interface ChartProps {
-  data1: Air4[];
-}
-
-const Chart: React.FC<ChartProps> = ({ data1 }) => {
-  
+export default function AirChartPM25() {
   const [chartData, setChartData] = useState<any>(null);
   const [dailyStats, setDailyStats] = useState<any[]>([]);
   const [showMin, setShowMin] = useState<boolean>(false);
@@ -80,7 +169,7 @@ const Chart: React.FC<ChartProps> = ({ data1 }) => {
 
       // ✅ Group ข้อมูลตามวัน
       const grouped: Record<string, number[]> = {};
-      data1.forEach((item: any) => {
+      data.forEach((item: any) => {
         const key = `${item.day}/${item.month}/${item.year}`;
         const pmValue = item.pm25_id.length > 0 ? item.pm25_id[0].value : null;
         if (pmValue === null) return;
@@ -204,6 +293,5 @@ const Chart: React.FC<ChartProps> = ({ data1 }) => {
       {chartData ? <Line data={chartData} options={options} /> : <p>Loading...</p>}
     </div>
   );
-};
+}
 
-export default Chart;

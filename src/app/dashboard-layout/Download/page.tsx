@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaDownload, FaEye } from "react-icons/fa"; 
+import Chart from "./Chart";
 import { PiOven } from "react-icons/pi";
 import {
   Modal,
@@ -13,6 +14,7 @@ import {
   Link,
 } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 
 interface MeteorologicalData {
   id: number;
@@ -307,6 +309,9 @@ const DownloadPage = () => {
           <FaDownload className="inline mr-2" />
           ดาวน์โหลด CSV
         </button>
+      </div>
+      <div>
+       <Chart meteorologicalData={data} />
       </div>
       <div>
         <button onClick={() => setTockenstatus(prev => !prev)}> Token</button>
