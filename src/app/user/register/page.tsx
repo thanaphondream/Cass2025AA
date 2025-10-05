@@ -147,8 +147,8 @@ export default function RegisterPage() {
       setStep("VERIFY_OTP");
 
       Swal.fire("ส่งรหัส OTP สำเร็จ", `โปรดตรวจสอบอีเมล (${form.email}) เพื่อกรอกรหัสยืนยัน`, "success");
-    } catch (err: any) {
-      Swal.fire("ผิดพลาด!", err.message || "เกิดข้อผิดพลาดในการส่ง OTP", "error");
+    } catch (err) {
+      Swal.fire("ผิดพลาด!", "error");
     } finally {
       setLoading(false);
     }
@@ -184,7 +184,7 @@ export default function RegisterPage() {
 
       await Swal.fire("สำเร็จ!", "สมัครสมาชิกเรียบร้อยแล้ว", "success");
       router.push("/user/login");
-    } catch (err: any) {
+    } catch (err) {
       Swal.fire("ผิดพลาด!", "เกิดข้อผิดพลาดในการบันทึกข้อมูล", "error");
     } finally {
       setLoading(false);

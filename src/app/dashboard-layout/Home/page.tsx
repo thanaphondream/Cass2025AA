@@ -47,12 +47,16 @@ interface LocationData {
   data3hours_weather_id: WeatherData[];
 }
 
+interface LatestLocation extends LocationData {
+  latestData: WeatherData;
+}
+
 export default function HomePage() {
   const [locationdata, setLocationdata] = useState<LocationData[]>([]);
-  const [latestLocations, setLatestLocations] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [latestLocations, setLatestLocations] = useState<LatestLocation[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,13 +64,13 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("http://weather-cass.online:3001/api/weatherstationnow");
+        const response = await fetch("http://localhost:3001/api/weatherstationnow");
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const jsondata: LocationData[] = await response.json();
         setLocationdata(jsondata);
 
-        const latest = jsondata
+        const latest: LatestLocation[] = jsondata
           .map((loc) => {
             if (loc.data3hours_weather_id && loc.data3hours_weather_id.length > 0) {
               const latestData = loc.data3hours_weather_id.reduce((prev, current) => {
@@ -78,12 +82,12 @@ export default function HomePage() {
             }
             return null;
           })
-          .filter(Boolean);
+          .filter((loc): loc is LatestLocation => loc !== null);
 
         setLatestLocations(latest);
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
-        setError(err.message || "เกิดข้อผิดพลาด");
+        setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาด");
       } finally {
         setLoading(false);
       }
@@ -92,9 +96,10 @@ export default function HomePage() {
     fetchData();
   }, []);
 
-  const filteredLocations = latestLocations.filter((loc) =>
-    loc.nameTH.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    loc.nameEN.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredLocations = latestLocations.filter(
+    (loc) =>
+      loc.nameTH.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      loc.nameEN.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -163,9 +168,9 @@ export default function HomePage() {
           <p className="text-gray-600 text-center text-lg mt-8">ไม่พบสถานีที่ตรงกับคำค้น</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredLocations.map((loc, idx) => (
+            {filteredLocations.map((loc) => (
               <div
-                key={idx}
+                key={loc.id}
                 className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
               >
                 <h3 className="font-extrabold text-2xl text-indigo-700 mb-3 border-b-2 border-indigo-100 pb-2">
@@ -197,7 +202,11 @@ export default function HomePage() {
                   </p>
                   <p>
                     🌧️ ปริมาณฝน:{" "}
-                    <span className={`font-semibold ${loc.latestData.rain > 0 ? "text-red-600" : "text-green-600"}`}>
+                    <span
+                      className={`font-semibold ${
+                        loc.latestData.rain > 0 ? "text-red-600" : "text-green-600"
+                      }`}
+                    >
                       {loc.latestData.rain} มม.
                     </span>
                   </p>

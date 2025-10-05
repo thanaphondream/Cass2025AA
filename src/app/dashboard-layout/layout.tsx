@@ -13,7 +13,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [showGasSubMenu, setShowGasSubMenu] = useState(false);
   const [boolean_token, setBoolean_Token] = useState<boolean>(false);
-  const [profileData, setProfileData] = useState<any>(null);
+  const [profileData, setProfileData] = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {

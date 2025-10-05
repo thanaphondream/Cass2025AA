@@ -1,7 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import L from "leaflet";
 
 // custom marker
@@ -14,7 +21,6 @@ const customIcon = L.icon({
   shadowSize: [41, 41],
 });
 
-
 interface Location {
   id: number;
   name_location: string;
@@ -25,7 +31,7 @@ interface Location {
   description: string;
 }
 
-interface Station_Weather {
+interface StationWeather {
   nameTH: string;
   nameEN: string;
   province: string;
@@ -34,6 +40,18 @@ interface Station_Weather {
   locations_id: number;
   stationNumber: string;
 }
+
+interface LatLng {
+  lat: number;
+  lng: number;
+}
+
+interface ClickableMapProps {
+  setLat: React.Dispatch<React.SetStateAction<number>>;
+  setLng: React.Dispatch<React.SetStateAction<number>>;
+  setTempMarker: React.Dispatch<React.SetStateAction<LatLng | null>>;
+}
+
 function FlyToLocation({ lat, lng }: { lat: number; lng: number }) {
   const map = useMap();
   if (lat && lng) {
@@ -42,8 +60,8 @@ function FlyToLocation({ lat, lng }: { lat: number; lng: number }) {
   return null;
 }
 
-const ClickableMap = ({ setLat, setLng, setTempMarker }: any) => {
-  const map = useMapEvents({
+const ClickableMap = ({ setLat, setLng, setTempMarker }: ClickableMapProps) => {
+  useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
       setLat(lat);
@@ -55,58 +73,64 @@ const ClickableMap = ({ setLat, setLng, setTempMarker }: any) => {
 };
 
 const Weather = () => {
-  const [location_data, setLocation_data] = useState<Location[]>([]);
+  const [locationData, setLocationData] = useState<Location[]>([]);
   const [lat, setLat] = useState<number>(13.7563);
   const [lng, setLng] = useState<number>(100.5018);
-  const [tempMarker, setTempMarker] = useState<{ lat: number; lng: number } | null>(null);
-  const [search, setSearch] = useState<{ lat: number; lng: number } | null>(null);
+  const [tempMarker, setTempMarker] = useState<LatLng | null>(null);
+  const [search, setSearch] = useState<LatLng | null>(null);
 
-  const [data_save, setData_save] = useState<Station_Weather>({
+  const [dataSave, setDataSave] = useState<StationWeather>({
     nameTH: "",
     nameEN: "",
     province: "",
     lat: 13.7563,
     long: 100.5018,
     locations_id: 0,
-    stationNumber: ""
+    stationNumber: "",
   });
 
   useEffect(() => {
-    const fn_apishow = async () => {
+    const fetchLocations = async () => {
       try {
-        const rs_data = await fetch("http://weather-cass.online:3001/api/locationget");
-        const api_json = await rs_data.json();
-        setLocation_data(api_json.Location_find);
+        const response = await fetch(
+          "http://weather-cass.online:3001/api/locationget"
+        );
+        const data = await response.json();
+        setLocationData(data.Location_find);
       } catch (err) {
-        console.error("เกิดข้อผิดพลาด : ", err);
+        console.error("เกิดข้อผิดพลาด :", err);
       }
     };
-    fn_apishow();
+    fetchLocations();
   }, []);
 
   const handleSearch = () => {
     if (lat && lng) {
       setSearch({ lat, lng });
-      setTempMarker({ lat, lng }); 
+      setTempMarker({ lat, lng });
     }
   };
 
-  const dataSAVe_Station_Weather = async () => {
+  const saveStationWeather = async () => {
     if (!tempMarker) {
       alert("กรุณาวางหมุดก่อนบันทึกข้อมูล!");
       return;
     }
 
     try {
-      const rs_save = await fetch("http://weather-cass.online:3001/api/weather", {
+      const response = await fetch("http://weather-cass.online:3001/api/weather", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data_save, lat: tempMarker.lat, long: tempMarker.lng }),
+        body: JSON.stringify({
+          ...dataSave,
+          lat: tempMarker.lat,
+          long: tempMarker.lng,
+        }),
       });
 
-      if (!rs_save.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
+      if (!response.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
 
-      const result = await rs_save.json();
+      const result = await response.json();
       console.log("บันทึกสำเร็จ:", result);
       alert("บันทึกข้อมูลเรียบร้อยแล้ว ✅");
       setTempMarker(null);
@@ -124,13 +148,15 @@ const Weather = () => {
 
       <div className="mt-6 flex flex-wrap justify-center gap-36">
         <div className="mt-12 ml-14 space-y-6">
-        <div>
+          <div>
             <label>หมายเลขสถานี</label>
             <input
               type="text"
               className="w-full py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={data_save.stationNumber}
-              onChange={(e) => setData_save({ ...data_save, stationNumber: e.target.value })}
+              value={dataSave.stationNumber}
+              onChange={(e) =>
+                setDataSave({ ...dataSave, stationNumber: e.target.value })
+              }
             />
           </div>
 
@@ -139,8 +165,10 @@ const Weather = () => {
             <input
               type="text"
               className="w-full py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={data_save.nameTH}
-              onChange={(e) => setData_save({ ...data_save, nameTH: e.target.value })}
+              value={dataSave.nameTH}
+              onChange={(e) =>
+                setDataSave({ ...dataSave, nameTH: e.target.value })
+              }
             />
           </div>
 
@@ -149,8 +177,10 @@ const Weather = () => {
             <input
               type="text"
               className="w-full py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={data_save.nameEN}
-              onChange={(e) => setData_save({ ...data_save, nameEN: e.target.value })}
+              value={dataSave.nameEN}
+              onChange={(e) =>
+                setDataSave({ ...dataSave, nameEN: e.target.value })
+              }
             />
           </div>
 
@@ -159,8 +189,10 @@ const Weather = () => {
             <input
               type="text"
               className="w-full py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
-              value={data_save.province}
-              onChange={(e) => setData_save({ ...data_save, province: e.target.value })}
+              value={dataSave.province}
+              onChange={(e) =>
+                setDataSave({ ...dataSave, province: e.target.value })
+              }
             />
           </div>
 
@@ -168,10 +200,15 @@ const Weather = () => {
             <label>ภูมิภาค</label>
             <select
               className="w-full py-2 border rounded-xl"
-              onChange={(e) => setData_save({ ...data_save, locations_id: Number(e.target.value) })}
+              onChange={(e) =>
+                setDataSave({
+                  ...dataSave,
+                  locations_id: Number(e.target.value),
+                })
+              }
             >
               <option value="">เลือกภูมิภาคที่ต้องการเพิ่ม</option>
-              {location_data.map((loc) => (
+              {locationData.map((loc) => (
                 <option key={loc.id} value={loc.id}>
                   {loc.nameTH}
                 </option>
@@ -209,7 +246,7 @@ const Weather = () => {
             </button>
             <button
               type="button"
-              onClick={dataSAVe_Station_Weather}
+              onClick={saveStationWeather}
               className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-xl"
             >
               บันทึกข้อมูล
@@ -229,21 +266,28 @@ const Weather = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            <ClickableMap setLat={setLat} setLng={setLng} setTempMarker={setTempMarker} />
+            <ClickableMap
+              setLat={setLat}
+              setLng={setLng}
+              setTempMarker={setTempMarker}
+            />
 
             {search && (
               <>
                 <Marker position={[search.lat, search.lng]} icon={customIcon}>
-                  <Popup>📍 {search.lat}, {search.lng}</Popup>
+                  <Popup>
+                    📍 {search.lat}, {search.lng}
+                  </Popup>
                 </Marker>
                 <FlyToLocation lat={search.lat} lng={search.lng} />
               </>
             )}
 
-            {/* Marker จากการคลิก */}
             {tempMarker && !search && (
               <Marker position={[tempMarker.lat, tempMarker.lng]} icon={customIcon}>
-                <Popup>📍 {tempMarker.lat}, {tempMarker.lng}</Popup>
+                <Popup>
+                  📍 {tempMarker.lat}, {tempMarker.lng}
+                </Popup>
               </Marker>
             )}
           </MapContainer>

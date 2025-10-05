@@ -73,9 +73,8 @@ export default function HomePage() {
 
         setStations(latest);
         setFilteredStations(latest); // แสดงทั้งหมดตอนเริ่ม
-      } catch (err: any) {
+      } catch (err) {
         console.error(err);
-        setError(err.message || "เกิดข้อผิดพลาด");
       } finally {
         setLoading(false);
       }
