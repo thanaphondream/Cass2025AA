@@ -85,7 +85,6 @@ function GasDataPage() {
   const [selectedStation, setSelectedStation] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("day");
-  const [selectedVariable, setSelectedVariable] = useState<GasVariable>('so2');
   const [selectedNo2Type, setSelectedNo2Type] = useState<No2Type>('so2');
   const [filteredData, setFilteredData] = useState<Ges[]>([]);
   const router = useRouter();
