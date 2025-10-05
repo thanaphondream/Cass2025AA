@@ -9,8 +9,11 @@ import {
   Legend,
   ResponsiveContainer,
   TooltipProps,
+  // Removed NameType and ValueType from here
 } from "recharts";
-import { NameType, ValueType } from "recharts/types/component/Tooltip";
+// FIX: Import NameType and ValueType from the recommended internal path
+import { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+
 
 interface Hours3Weather {
   id: number;
@@ -37,7 +40,7 @@ type WeatherVariable = "temperaturde" | "humidity" | "rain" | "windspeed10m" | "
 
 interface VariableDetail {
   label: string;
-  icon: React.ReactNode; 
+  icon: React.ReactNode;
   color: string;
   unit: string;
 }
