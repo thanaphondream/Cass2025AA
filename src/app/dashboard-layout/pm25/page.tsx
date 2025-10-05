@@ -360,7 +360,7 @@ function Page() {
         let message = "กรุณาเลือกสถานีที่ต้องการดูข้อมูล";
         let subMessage = "เลือกจากเมนู 'เลือกภูมิภาค' และ 'เลือกสถานี' ด้านบน";
         let boltClass = "text-yellow-500";
-        let cloudClass = "text-gray-400";
+        const cloudClass = "text-gray-400";
 
         if (selectedStation) {
             message = "ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก";
