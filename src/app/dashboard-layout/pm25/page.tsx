@@ -260,7 +260,7 @@ function Page() {
 
 
     const dataForDisplay = useMemo<LastAQI_Ar4thai[]>(() => {
-        let combinedData = [...filteredData];
+        const combinedData = [...filteredData];
         const latestNowData = dataNow?.latest_aqi?.[0];
 
         if (latestNowData && selectedDate) {
