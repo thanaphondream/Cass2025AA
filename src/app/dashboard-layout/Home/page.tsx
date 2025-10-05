@@ -1,120 +1,115 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 import Link from "next/link";
+import { FaSmog } from "react-icons/fa";
 
-interface MeteorologicalData {
+const LeafletMap = dynamic(() => import("./LeafletMep"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-96 flex items-center justify-center bg-gray-100 rounded-lg">
+      กำลังโหลดแผนที่...
+    </div>
+  ),
+});
+
+interface WeatherData {
   id: number;
   year: number;
   month: number;
   day: number;
   hours: number;
-  temperature: number; 
+  temperaturde: number;
   humidity: number;
   slp: number;
+  stationPressure: number;
+  dewPoint: number;
+  vaporPressure: number;
   rain: number;
+  rain24h: number;
   windspeed10m: number;
-  winddirection10m: number; 
+  winddirdedtion10m: number;
   lowcloud: number;
   highcloud: number;
+  visibility: number;
   date: string;
 }
 
 interface LocationData {
   id: number;
-  name_location: string;
-  latitude: number;
-  longitude: number;
-  date: string;
-  meteorological_id: MeteorologicalData[];
+  nameTH: string;
+  nameEN: string;
+  province: string;
+  lat: string;
+  long: string;
+  stationNumber: string;
+  data3hours_weather_id: WeatherData[];
 }
-
-interface LatestLocation {
-  name: string;
-  latitude: number;
-  longitude: number;
-  latestData: MeteorologicalData;
-}
-
-const LeafletMap = dynamic(() => import('./LeafletMep'), { 
-  ssr: false,
-  loading: () => <div className="h-96 flex items-center justify-center bg-gray-100 rounded-lg">กำลังโหลดแผนที่...</div>
-});
 
 export default function HomePage() {
-  const router = useRouter();
   const [locationdata, setLocationdata] = useState<LocationData[]>([]);
-  const [latestLocations, setLatestLocations] = useState<LatestLocation[]>([]);
+  const [latestLocations, setLatestLocations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-   const fetchData = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    const response = await fetch("https://cass-api-data.vercel.app/api/locationget");
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+        const response = await fetch("http://weather-cass.online:3001/api/weatherstationnow");
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-    const jsondata = await response.json();
-    console.log("Raw API response:", jsondata);
+        const jsondata: LocationData[] = await response.json();
+        setLocationdata(jsondata);
 
-    if (!Array.isArray(jsondata.Location_find)) {
-      throw new Error("API response.Location_find is not an array");
-    }
+        const latest = jsondata
+          .map((loc) => {
+            if (loc.data3hours_weather_id && loc.data3hours_weather_id.length > 0) {
+              const latestData = loc.data3hours_weather_id.reduce((prev, current) => {
+                const prevDate = new Date(prev.date);
+                const currDate = new Date(current.date);
+                return currDate > prevDate ? current : prev;
+              });
+              return { ...loc, latestData };
+            }
+            return null;
+          })
+          .filter(Boolean);
 
-    setLocationdata(jsondata.Location_find);
-
-    const withLatest: LatestLocation[] = jsondata.Location_find
-      .map((loc: LocationData) => {
-        const latest = [...loc.meteorological_id].sort((a, b) => {
-          const dateA = new Date(`${a.date}T${String(a.hours).padStart(2, '0')}:00:00`);
-          const dateB = new Date(`${b.date}T${String(b.hours).padStart(2, '0')}:00:00`);
-          return dateB.getTime() - dateA.getTime();
-        })[0];
-
-        return {
-          name: loc.name_location,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          latestData: latest,
-        };
-      })
-      .filter((loc: LatestLocation) => loc.latestData)
-      .sort((a: LatestLocation, b: LatestLocation) => new Date(b.latestData.date).getTime() - new Date(a.latestData.date).getTime())
-      .slice(0, 4);
-
-    setLatestLocations(withLatest);
-
-  } catch (err) {
-    console.error("Error fetching location data:", err);
-    setError("ไม่สามารถโหลดข้อมูลได้ โปรดลองอีกครั้งในภายหลัง");
-  } finally {
-    setLoading(false);
-  }
-};
+        setLatestLocations(latest);
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "เกิดข้อผิดพลาด");
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchData();
-  });
+  }, []);
 
-  // if (loading) {
-  //   return (
-  //     <div className="flex justify-center items-center h-screen">
-  //       <p className="text-xl text-gray-600">กำลังโหลดข้อมูล...</p>
-  //     </div>
-  //   );
-  // }
+  const filteredLocations = latestLocations.filter((loc) =>
+    loc.nameTH.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    loc.nameEN.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-xl text-gray-600">กำลังโหลดข้อมูล...</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
       <div className="flex flex-col justify-center items-center h-screen">
         <p className="text-xl text-red-600 mb-4">{error}</p>
-        <button 
+        <button
           onClick={() => window.location.reload()}
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         >
@@ -126,34 +121,55 @@ export default function HomePage() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto min-h-screen bg-gray-50">
-      <div className="ml-auto">
-        <Link href="/dashboard-layout/Home/Pm25" className='mb-6 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition'>
-          ดูข้อมูลpm2.5
+      <div className="flex justify-between items-center mb-6">
+        <Link
+          href="/dashboard-layout/Home/Pm25"
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+        >
+          <p className="flex gap-2"><FaSmog />ดูข้อมูลpm2.5</p>
         </Link>
+
+        <div className="flex items-center space-x-2">
+          <input
+            type="text"
+            placeholder="ค้นหาสถานี..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          <button
+            onClick={() => {}}
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          >
+            ค้นหา
+          </button>
+        </div>
       </div>
+
       <h1 className="text-3xl md:text-4xl font-extrabold mb-8 text-center text-blue-700 animate-fade-in-down">
-        ค่าพยากรอากาศในแต่ละสถานี 
+        ค่าพยากรอากาศในแต่ละสถานี
       </h1>
 
       <div className="mb-12 h-96 rounded-lg overflow-hidden shadow-lg">
         <LeafletMap locationdata={locationdata} />
       </div>
+
       <div className="mt-10">
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-200 pb-2">
-          ✨ 4 สถานที่ที่มีข้อมูลล่าสุด
+          ✨ สถานีที่มีข้อมูลล่าสุด
         </h2>
 
-        {latestLocations.length === 0 ? (
-          <p className="text-gray-600 text-center text-lg mt-8">ไม่พบข้อมูลล่าสุดจากสถานีใดๆ</p>
+        {filteredLocations.length === 0 ? (
+          <p className="text-gray-600 text-center text-lg mt-8">ไม่พบสถานีที่ตรงกับคำค้น</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {latestLocations.map((loc, idx) => (
+            {filteredLocations.map((loc, idx) => (
               <div
                 key={idx}
                 className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
               >
                 <h3 className="font-extrabold text-2xl text-indigo-700 mb-3 border-b-2 border-indigo-100 pb-2">
-                  📍 {loc.name}
+                  📍 {loc.nameTH}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
                   🕒 อัปเดตล่าสุด:{" "}
@@ -163,14 +179,14 @@ export default function HomePage() {
                       month: "long",
                       day: "numeric",
                     })}{" "}
-                    เวลา {String(loc.latestData.hours).padStart(2, '0')}:00 น.
+                    เวลา {String(loc.latestData.hours).padStart(2, "0")}:00 น.
                   </span>
                 </p>
                 <div className="space-y-2 text-base text-gray-700">
                   <p>
                     🌡️ อุณหภูมิ:{" "}
                     <span className="font-semibold text-blue-600">
-                      {loc.latestData.temperature}°C
+                      {loc.latestData.temperaturde}°C
                     </span>
                   </p>
                   <p>
@@ -181,7 +197,7 @@ export default function HomePage() {
                   </p>
                   <p>
                     🌧️ ปริมาณฝน:{" "}
-                    <span className={`font-semibold ${loc.latestData.rain > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <span className={`font-semibold ${loc.latestData.rain > 0 ? "text-red-600" : "text-green-600"}`}>
                       {loc.latestData.rain} มม.
                     </span>
                   </p>
@@ -194,7 +210,7 @@ export default function HomePage() {
                   <p>
                     🧭 ทิศทางลม:{" "}
                     <span className="font-semibold text-orange-600">
-                      {loc.latestData.winddirection10m}°
+                      {loc.latestData.winddirdedtion10m}°
                     </span>
                   </p>
                 </div>

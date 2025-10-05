@@ -1,173 +1,166 @@
-"use client";
+'use client'
 
-import React, { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import React, { useState } from "react";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
+  LineChart,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
   Tooltip,
+  ResponsiveContainer,
   Legend,
-  ChartData,
-  ChartOptions,
-} from "chart.js";
+} from "recharts";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-interface Pm25 {
+interface Pollutant {
   id: number;
   color_id: number;
   aqi: number;
   value: number;
 }
 
-interface Pm10 {
-  id: number;
-  color_id: number;
-  aqi: number;
-  value: number;
-}
-
-interface Air4 {
+interface LastAQI_Ar4thai {
   id: number;
   year: number;
   month: number;
   day: number;
   hours: number;
-  createAt: Date;
-  area: string;
-  nameTH: string;
-  nameEN: string;
-  stationType: string;
-  pm25_id: Pm25[];
-  pm10_id: Pm10[];
+  pm25_id: Pollutant[];
+  pm10_id: Pollutant[];
+  o3_id: Pollutant[];
+  co_id: Pollutant[];
+  no2_id: Pollutant[];
+  so2_id: Pollutant[];
 }
 
 interface ChartProps {
-  data1: Air4[];
+  filteredData: LastAQI_Ar4thai[];
+  viewMode: "day" | "week" | "month";
 }
 
-interface DailyStat {
-  date: string;
-  min: number;
-  max: number;
-  avg: number;
-}
+const Chart: React.FC<ChartProps> = ({ filteredData, viewMode }) => {
+  const [visibleLines, setVisibleLines] = useState({
+    pm25: true,
+    pm10: true,
+    o3: false,
+    co: false,
+    no2: false,
+    so2: false,
+  });
 
-const Chart: React.FC<ChartProps> = ({ data1 }) => {
-  const [chartData, setChartData] = useState<ChartData<"line", number[], string> | null>(null);
-  const [dailyStats, setDailyStats] = useState<DailyStat[]>([]);
-  const [showMin, setShowMin] = useState(false);
-  const [showMax, setShowMax] = useState(false);
+  // ✅ คำนวณค่าเฉลี่ยรายวัน (ใช้ตอนเลือก week/month)
+  const calculateDailyAverage = () => {
+    const grouped: {
+      [key: string]: {
+        pm25: number;
+        pm10: number;
+        o3: number;
+        co: number;
+        no2: number;
+        so2: number;
+        count: number;
+      };
+    } = {};
 
-  // คำนวณค่าเฉลี่ย Min Max ตามวัน
-  useEffect(() => {
-    if (!data1 || data1.length === 0) return;
+    filteredData.forEach((d) => {
+      const key = `${d.day}/${d.month}`;
+      if (!grouped[key]) {
+        grouped[key] = { pm25: 0, pm10: 0, o3: 0, co: 0, no2: 0, so2: 0, count: 0 };
+      }
 
-    const grouped: Record<string, number[]> = {};
-
-    data1.forEach((item) => {
-      const key = `${item.day}/${item.month}/${item.year}`;
-      const pmValue = item.pm25_id.length > 0 ? item.pm25_id[0].value : null;
-      if (pmValue === null) return;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(pmValue);
+      grouped[key].pm25 += d.pm25_id[0]?.value ?? 0;
+      grouped[key].pm10 += d.pm10_id[0]?.value ?? 0;
+      grouped[key].o3 += d.o3_id[0]?.value ?? 0;
+      grouped[key].co += d.co_id[0]?.value ?? 0;
+      grouped[key].no2 += d.no2_id[0]?.value ?? 0;
+      grouped[key].so2 += d.so2_id[0]?.value ?? 0;
+      grouped[key].count += 1;
     });
 
-    const stats: DailyStat[] = Object.entries(grouped).map(([date, values]) => ({
-      date,
-      min: Math.min(...values),
-      max: Math.max(...values),
-      avg: values.reduce((sum, v) => sum + v, 0) / values.length,
+    return Object.entries(grouped).map(([key, val]) => ({
+      name: key,
+      pm25: val.pm25 / val.count,
+      pm10: val.pm10 / val.count,
+      o3: val.o3 / val.count,
+      co: val.co / val.count,
+      no2: val.no2 / val.count,
+      so2: val.so2 / val.count,
     }));
+  };
 
-    setDailyStats(stats);
+  // ✅ เลือกข้อมูลสำหรับกราฟ
+  const chartData =
+    viewMode === "day"
+      ? filteredData.map((d) => ({
+          name: `${d.hours}:00`,
+          pm25: d.pm25_id[0]?.value ?? null,
+          pm10: d.pm10_id[0]?.value ?? null,
+          o3: d.o3_id[0]?.value ?? null,
+          co: d.co_id[0]?.value ?? null,
+          no2: d.no2_id[0]?.value ?? null,
+          so2: d.so2_id[0]?.value ?? null,
+        }))
+      : calculateDailyAverage();
 
-    const labels = stats.map((s) => s.date);
-    const avgValues = stats.map((s) => s.avg);
-
-    setChartData({
-      labels,
-      datasets: [
-        {
-          label: "ค่าเฉลี่ย",
-          data: avgValues,
-          borderColor: "rgba(0, 170, 255, 1)",
-          backgroundColor: "rgba(0, 170, 255, 0.3)",
-          tension: 0.4,
-        },
-      ],
-    });
-  }, [data1]);
-
-  // Update Chart เมื่อกดปุ่ม
-  useEffect(() => {
-    if (!dailyStats.length) return;
-
-    const labels = dailyStats.map((s) => s.date);
-
-    const datasets: ChartData<"line", number[], string>["datasets"] = [
-      {
-        label: "ค่าเฉลี่ย",
-        data: dailyStats.map((s) => s.avg),
-        borderColor: "rgba(0, 170, 255, 1)",
-        backgroundColor: "rgba(0, 170, 255, 0.3)",
-        tension: 0.4,
-      },
-    ];
-
-    if (showMin) {
-      datasets.push({
-        label: "ค่าต่ำสุด",
-        data: dailyStats.map((s) => s.min),
-        borderColor: "rgba(0, 200, 100, 1)",
-        backgroundColor: "rgba(0, 200, 100, 0.3)",
-        borderDash: [5, 5],
-        tension: 0.4,
-      });
-    }
-
-    if (showMax) {
-      datasets.push({
-        label: "ค่าสูงสุด",
-        data: dailyStats.map((s) => s.max),
-        borderColor: "rgba(255, 99, 132, 1)",
-        backgroundColor: "rgba(255, 99, 132, 0.3)",
-        borderDash: [5, 5],
-        tension: 0.4,
-      });
-    }
-
-    setChartData({ labels, datasets });
-  }, [showMin, showMax, dailyStats]);
-
-  const options: ChartOptions<"line"> = {
-    responsive: true,
-    plugins: { legend: { display: true } },
+  const lineColors: Record<string, string> = {
+    pm25: "#8884d8",
+    pm10: "#82ca9d",
+    o3: "#ff7300",
+    co: "#ff0000",
+    no2: "#0088FE",
+    so2: "#AA336A",
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Bangna PM2.5</h2>
-      <div className="flex gap-4 mb-4">
-        <button
-          onClick={() => setShowMin((prev) => !prev)}
-          className={`px-4 py-2 rounded ${showMin ? "bg-green-500 text-white" : "bg-gray-200"}`}
-        >
-          {showMin ? "ซ่อน Min" : "แสดง Min"}
-        </button>
-        <button
-          onClick={() => setShowMax((prev) => !prev)}
-          className={`px-4 py-2 rounded ${showMax ? "bg-red-500 text-white" : "bg-gray-200"}`}
-        >
-          {showMax ? "ซ่อน Max" : "แสดง Max"}
-        </button>
+    <div>
+      {/* ปุ่มเลือกแสดงเส้น */}
+      <div className="flex gap-2 mb-4 flex-wrap">
+        {Object.keys(visibleLines).map((key) => (
+          <button
+            key={key}
+            onClick={() =>
+              setVisibleLines({
+                ...visibleLines,
+                [key]: !visibleLines[key as keyof typeof visibleLines],
+              })
+            }
+            className={`px-3 py-1 rounded text-sm ${
+              visibleLines[key as keyof typeof visibleLines]
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200"
+            }`}
+          >
+            {key.toUpperCase()}
+          </button>
+        ))}
       </div>
 
-      {chartData ? <Line data={chartData} options={options} /> : <p>Loading...</p>}
+      {/* กราฟ */}
+      <ResponsiveContainer width="100%" height={400}>
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          {/* ✅ ให้แกน Y ปรับ min/max อัตโนมัติจากข้อมูล */}
+          <YAxis domain={["dataMin", "dataMax"]} allowDecimals={true} />
+          <Tooltip />
+          <Legend />
+          {Object.entries(visibleLines).map(
+            ([key, show]) =>
+              show && (
+                <Line
+                  key={key}
+                  type="monotone"
+                  dataKey={key}
+                  stroke={lineColors[key]}
+                  name={key.toUpperCase()}
+                  strokeWidth={2}
+                  dot={{ r: 2 }}
+                  connectNulls
+                />
+              )
+          )}
+        </LineChart>
+      </ResponsiveContainer>
     </div>
   );
 };

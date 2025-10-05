@@ -1,16 +1,28 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaCaretDown, FaUser } from "react-icons/fa";
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [status_Tap, set_Status_Tap] = useState(true);
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [showGasSubMenu, setShowGasSubMenu] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [boolean_token, setBoolean_Token] = useState<boolean>(false);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setBoolean_Token(!!token);
+    if (token) {
+      fetchProfile(token);
+    }
+  }, []);
 
   useEffect(() => {
     if (
@@ -19,11 +31,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       pathname.startsWith("/dashboard-layout/Ges/")
     ) {
       setShowSubMenu(true);
-      if (pathname.startsWith("/dashboard-layout/Ges/")) {
-        setShowGasSubMenu(true);
-      } else {
-        setShowGasSubMenu(false);
-      }
+      setShowGasSubMenu(pathname.startsWith("/dashboard-layout/Ges/"));
     } else {
       setShowSubMenu(false);
       setShowGasSubMenu(false);
@@ -31,159 +39,166 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [pathname]);
 
   const handleLogout = () => {
-    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    router.push("/login");
+    localStorage.removeItem("token");
+    setBoolean_Token(false);
+    setProfileData(null);
+    router.push("/user/login");
+  };
+
+  const fetchProfile = async (token: string) => {
+    try {
+      const res = await fetch("http://weather-cass.online:3001/api/decode-token", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      setProfileData(data.payload);
+    } catch (error) {
+      console.error("เกิดข้อผิดพลาด:", error);
+    }
   };
 
   return (
-    <div className="flex min-h-screen">
-      <aside
-        className={`bg-gray-800 text-white p-6 fixed h-full transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "w-60" : "w-0"
-        } ${!isSidebarOpen && "hidden"}`}
-      >
-        {isSidebarOpen && (
-          <>
-            <div className="flex items-center justify-between mb-10">
-              <div className="text-2xl font-bold">ข้อมูลรายวัน</div>
-              <button
-                onClick={() => setIsSidebarOpen(false)}
-                className="text-white focus:outline-none ml-auto"
-              >
-                <FaTimes size={24} />
-              </button>
-            </div>
+    <div className="flex h-screen flex-col">
+      {/* Header */}
+      <header className="bg-gray-900 text-white flex items-center justify-between px-4 py-2 shadow">
+        <div className="flex items-center space-x-3">
+          <button
+            className="text-xl"
+            onClick={() => set_Status_Tap((prev) => !prev)}
+          >
+            &#9776;
+          </button>
+          <span className="font-bold text-lg">ระบบจัดการบ้าน</span>
+        </div>
 
-            <nav className="flex flex-col space-y-4">
-              <Link
-                href="/dashboard-layout/Home"
-                className={`hover:text-blue-400 ${
-                  pathname === "/dashboard-layout/Home" ? "text-blue-400 font-semibold" : ""
-                }`}
+        <div className="flex items-center space-x-4 relative">
+          {boolean_token && profileData ? (
+            <div className="flex items-center space-x-2 cursor-pointer relative">
+              <div
+                className="flex items-center space-x-2"
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
               >
-                หน้าหลัก
-              </Link>
+                <FaUser className="text-xl text-indigo-400" />
+                <span className="hidden sm:inline">โปรไฟล์</span>
+              </div>
 
-              <button
-                onClick={() => setShowSubMenu((prev) => !prev)}
-                className={`flex items-center justify-between w-full text-left hover:text-blue-400 ${
-                  showSubMenu ? "text-blue-400 font-semibold" : ""
-                }`}
-              >
-                ดูข้อมูลต่างๆ
-                <span
-                  className={`transform transition-transform duration-200 ${
-                    showSubMenu ? "rotate-90" : ""
-                  }`}
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-12 w-52 bg-white text-gray-800 rounded-xl shadow-2xl z-50 transform origin-top-right animate-fade-in">
+                
+                <div className="p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl" onClick={() => setShowProfileMenu(prev => !prev)}>
+                  <p className="font-semibold text-sm truncate">{profileData.email}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">ID: {profileData.id}</p>
+                </div>
+                
+                <button
+                  className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 hover:text-red-700 transition duration-150 rounded-b-xl"
+                  onClick={handleLogout}
                 >
-                  &#9658;
-                </span>
-              </button>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  ออกจากระบบ
+                </button>
+              </div>
+            )}
+            </div>
+          ) : (
+            <button
+              onClick={() => router.push("/user/login")}
+              className="text-sm hover:text-green-400"
+            >
+              ⏻ Login
+            </button>
+          )}
+        </div>
+      </header>
 
-              {showSubMenu && (
-                <div className="ml-4 flex flex-col space-y-2 border-l border-gray-600 pl-4">
+      {/* Layout */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        {status_Tap && (
+          <aside className="w-64 bg-gray-800 text-white flex flex-col">
+            <nav className="flex-1 overflow-y-auto">
+              <ul>
+                <li>
                   <Link
-                    href="/dashboard-layout/Download"
-                    className={`hover:text-blue-400 ${
-                      pathname === "/dashboard-layout/Download" ? "text-blue-400 font-semibold" : ""
+                    href="/dashboard-layout/Home"
+                    className={`flex items-center p-2 hover:bg-gray-700 ${
+                      pathname === "/dashboard-layout/Home" ? "bg-gray-700" : ""
                     }`}
                   >
-                   ค่าพยากรอากาศ
+                    หน้าหลัก
                   </Link>
+                </li>
 
-                  <button
-                    onClick={() => setShowGasSubMenu((prev) => !prev)}
+                {/* เมนูย่อย */}
+                <button
+                    onClick={() => setShowSubMenu((prev) => !prev)}
                     className={`flex items-center justify-between w-full text-left hover:text-blue-400 ${
-                      showGasSubMenu ? "text-blue-400 font-semibold" : ""
+                      showSubMenu ? "text-blue-400 font-semibold" : ""
                     }`}
                   >
-                    ข้อมูลแก๊ส
+                    ดูข้อมูลต่างๆ
                     <span
-                      className={`transform transition-transform duration-200 ${
-                        showGasSubMenu ? "rotate-90" : ""
-                      }`}
+                      className={`transform transition-transform duration-200`}
                     >
-                      &#9658;
                     </span>
                   </button>
-
-                  {showGasSubMenu && (
-                    <div className="ml-4 flex flex-col space-y-2 border-l border-gray-700 pl-4">
+                    <div className="ml-4 flex flex-col space-y-2 border-l border-gray-600 pl-4">
                       <Link
-                        href="/dashboard-layout/Ges/So2"
+                        href="/dashboard-layout/Weather-Data"
                         className={`hover:text-blue-400 ${
-                          pathname === "/dashboard-layout/Ges/So2" ? "text-blue-400 font-semibold" : ""
+                          pathname === "/dashboard-layout/Download" ? "text-blue-400 font-semibold" : ""
                         }`}
                       >
-                        แก๊ส So2
+                      สภาพอากาศในแต่ละสถานี
+                      </Link>
+                        <Link
+                        href="/dashboard-layout/Ges"
+                        className={`hover:text-blue-400 ${
+                          pathname === "/dashboard-layout/Ges" ? "text-blue-400 font-semibold" : ""
+                        }`}
+                      >
+                        ดูข้อมูลแก๊สแต่ละสถานี
                       </Link>
                       <Link
-                        href="/dashboard-layout/Ges/Choho"
+                        href="/dashboard-layout/pm25"
                         className={`hover:text-blue-400 ${
-                          pathname === "/dashboard-layout/Ges/Choho" ? "text-blue-400 font-semibold" : ""
+                          pathname === "/dashboard-layout/pm25" ? "text-blue-400 font-semibold" : ""
                         }`}
                       >
-                        แก๊ส Choho
-                      </Link>
-                      <Link
-                        href="/dashboard-layout/Ges/No2"
-                        className={`hover:text-blue-400 ${
-                          pathname === "/dashboard-layout/Ges/No2" ? "text-blue-400 font-semibold" : ""
-                        }`}
-                      >
-                        แก๊ส No2
+                        ดูข้อมูลฝุ่นในแต่ละสถานี
                       </Link>
                     </div>
-                  )}
 
+                {/* เกี่ยวกับเรา */}
+                <li>
                   <Link
-                    href="/dashboard-layout/pm25"
-                    className={`hover:text-blue-400 ${
-                      pathname === "/dashboard-layout/pm25" ? "text-blue-400 font-semibold" : ""
+                    href="/dashboard-layout/About"
+                    className={`flex items-center p-2 hover:bg-gray-700 ${
+                      pathname === "/dashboard-layout/About"
+                        ? "bg-gray-700"
+                        : ""
                     }`}
                   >
-                    ข้อมูล PM2.5
+                    เกี่ยวกับเรา
                   </Link>
-                </div>
-              )}
-
-              <Link
-                href="/dashboard-layout/About"
-                className={`hover:text-blue-400 ${
-                  pathname === "/dashboard-layout/About" ? "text-blue-400 font-semibold" : ""
-                }`}
-              >
-                เกี่ยวกับเรา
-              </Link>
-
-              {/* <button
-                onClick={handleLogout}
-                className="mt-4 bg-red-600 text-white p-2 rounded hover:bg-red-700 transition-colors duration-200"
-              >
-                Logout
-              </button> */}
+                </li>
+              </ul>
             </nav>
-          </>
-        )}
-      </aside>
-
-      <main
-        className={`flex-1 p-6 transition-all duration-300 ease-in-out ${
-          isSidebarOpen ? "ml-60" : "ml-0"
-        }`}
-      >
-        {!isSidebarOpen && (
-          <button
-            onClick={() => setIsSidebarOpen(true)}
-            className="fixed top-6 left-6 text-gray-800 bg-gray-200 p-2 rounded-full shadow-md z-50 hover:bg-gray-300"
-            title="Open Sidebar"
-          >
-            <FaBars size={24} />
-          </button>
+          </aside>
         )}
 
-        {children}
-      </main>
+        {/* Main Content */}
+        <main className="flex-1 bg-gray-50 p-6 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

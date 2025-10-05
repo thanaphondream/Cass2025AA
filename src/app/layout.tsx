@@ -14,7 +14,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="../../public/cass2025.jpg" sizes="any" />
       </head>
       <body>
         <main>{children}</main>

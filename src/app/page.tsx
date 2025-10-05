@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function AuthRedirect() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      router.replace("/dashboard-layout/Home");
-    }, 100);
+    router.replace("/dashboard-layout/Home");
 
-    return () => clearTimeout(timeout);
+    setLoading(false);
   }, [router]);
 
-  return (
-    <div style={{ textAlign: "center", paddingTop: "2rem" }}>
-      <p aria-live="polite">กำลังตรวจสอบสิทธิ์...</p>
-      <span role="img" aria-label="loading">🔄</span>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", paddingTop: "2rem" }}>
+        <p aria-live="polite">กำลังตรวจสอบสิทธิ์...</p>
+        <span role="img" aria-label="loading">🔄</span>
+      </div>
+    );
+  }
+
+  return null;
 }

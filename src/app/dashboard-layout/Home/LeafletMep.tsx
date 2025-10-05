@@ -5,104 +5,113 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-interface MeteorologicalData {
+interface WeatherData {
   id: number;
   year: number;
   month: number;
   day: number;
   hours: number;
-  temperature: number;
+  temperaturde: number;
   humidity: number;
   slp: number;
+  stationPressure?: number;
+  dewPoint?: number;
+  vaporPressure?: number;
   rain: number;
   windspeed10m: number;
-  winddirection10m: number;
-  lowcloud: number;
-  highcloud: number;
+  winddirdedtion10m: number;
   date: string;
 }
 
 interface LocationData {
   id: number;
-  name_location: string;
-  latitude: number;
-  longitude: number;
-  date: string;
-  meteorological_id: MeteorologicalData[];
+  nameTH: string;
+  nameEN: string;
+  province: string;
+  lat: string;
+  long: string;
+  stationNumber?: string;
+  data3hours_weather_id: WeatherData[];
 }
 
 interface LeafletMapProps {
   locationdata: LocationData[];
 }
 
-const RAIN_COLORS = {
-  HIGH: "#ff0000",
-  MEDIUM: "#ffff00",
-  LOW: "#00ff00",
-};
-
 const getRainColor = (rainValue: number) => {
-  if (rainValue > 50) return RAIN_COLORS.HIGH;
-  if (rainValue > 20) return RAIN_COLORS.MEDIUM;
-  return RAIN_COLORS.LOW;
+  if (rainValue > 50) return "#ff4d4f"; // แดง = ฝนหนัก
+  if (rainValue > 20) return "#faad14"; // เหลือง = ฝนปานกลาง
+  return "#52c41a"; // เขียว = ฝนเบา
 };
 
-const createCustomIcon = (color: string) =>
-  new L.Icon({
-    iconUrl: `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' fill='${encodeURIComponent(
-      color
-    )}'><path d='M16 2C9.37 2 4 7.37 4 14c0 8.45 12 16 12 16s12-7.55 12-16c0-6.63-5.37-12-12-12z'/></svg>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
+const createCircleIcon = (color: string, temperature: number) => {
+  return L.divIcon({
+    html: `<div style="
+      background: ${color};
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+       color:black;
+      font-weight: bold;
+      font-size: 12px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    ">
+      ${temperature}°
+    </div>`,
+    className: "",
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
   });
+};
 
 const LeafletMap: React.FC<LeafletMapProps> = ({ locationdata }) => {
   if (!locationdata || locationdata.length === 0) {
-    return <p>ไม่มีข้อมูลแสดงแผนที่</p>;
+    return <p className="text-center text-gray-500 mt-4">ไม่มีข้อมูลแสดงแผนที่</p>;
   }
 
   return (
     <MapContainer
-      center={[15.0, 100.0]}
+      center={[11.0, 100.0]}
       zoom={5}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "600px", width: "100%" }}
       attributionControl={false}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-      {locationdata.map((location) => {
-        if (!location.meteorological_id.length) return null;
 
-        const latestData = [...location.meteorological_id].sort((a, b) => {
+      {locationdata.map((location) => {
+        if (!location.data3hours_weather_id || location.data3hours_weather_id.length === 0) return null;
+
+        const latestData = [...location.data3hours_weather_id].sort((a, b) => {
           const dateA = new Date(`${a.date}T${String(a.hours).padStart(2, "0")}:00:00`);
           const dateB = new Date(`${b.date}T${String(b.hours).padStart(2, "0")}:00:00`);
           return dateB.getTime() - dateA.getTime();
         })[0];
 
         const rainColor = getRainColor(latestData.rain);
-        const customIcon = createCustomIcon(rainColor);
+        const circleIcon = createCircleIcon(rainColor, latestData.temperaturde);
 
         return (
-          <Marker key={location.id} position={[location.latitude, location.longitude]} icon={customIcon}>
+          <Marker
+            key={location.id}
+            position={[parseFloat(location.lat), parseFloat(location.long)]}
+            icon={circleIcon}
+          >
+            {/* Popup ข้อมูลเมื่อคลิก */}
             <Popup>
-              <div className="space-y-1">
-                <h3 className="font-bold text-lg">{location.name_location}</h3>
-                <p className="text-sm text-gray-600">
-                  อัปเดต: {new Date(latestData.date).toLocaleDateString("th-TH")}{" "}
-                  {String(latestData.hours).padStart(2, "0")}:00 น.
+              <div className="text-sm">
+                <h3 className="font-bold text-lg">{location.nameTH}</h3>
+                <p> จังหวัด: {location.province}</p>
+                <p> อุณหภูมิ: {latestData.temperaturde}°C</p>
+                <p> ความชื้น: {latestData.humidity}%</p>
+                <p> ปริมาณฝน: {latestData.rain} มม.</p>
+                <p> ความเร็วลม: {latestData.windspeed10m} ม./วินาที</p>
+                <p>ทิศทางลม: {latestData.winddirdedtion10m}°</p>
+                <p className="text-xs text-gray-500">
+                  อัปเดต: {latestData.date} เวลา {String(latestData.hours).padStart(2, "0")}:00 น.
                 </p>
-                <div className="grid grid-cols-2 gap-1 mt-2">
-                  <div className="font-medium">อุณหภูมิ:</div>
-                  <div>{latestData.temperature} °C</div>
-                  <div className="font-medium">ความชื้น:</div>
-                  <div>{latestData.humidity}%</div>
-                  <div className="font-medium">ปริมาณฝน:</div>
-                  <div style={{ color: rainColor }} className="font-semibold">
-                    {latestData.rain} มม.
-                  </div>
-                  <div className="font-medium">ความเร็วลม:</div>
-                  <div>{latestData.windspeed10m} ม./วินาที</div>
-                </div>
               </div>
             </Popup>
           </Marker>
