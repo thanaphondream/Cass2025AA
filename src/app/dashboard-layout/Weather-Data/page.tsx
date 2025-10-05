@@ -72,7 +72,7 @@ function Page() {
       try {
         // เปลี่ยน fetch เป็น API endpoint จริงของคุณ
         const rs = await fetch("http://weather-cass.online:3001/api/weather/3hoursweather");
-        const data: Location[] = await rs.json();
+        const data = await rs.json();
 
         const processedData: Location[] = data.map((loc: Location) => ({
           ...loc,

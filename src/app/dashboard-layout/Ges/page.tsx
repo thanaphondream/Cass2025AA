@@ -2,37 +2,34 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
-import { FaDownload, FaCloudSun, FaThermometerHalf, FaTint, FaCloudShowersHeavy, FaWind, FaMapMarkerAlt, FaSmog, FaExclamationTriangle } from "react-icons/fa";
+import { FaDownload, FaSmog, FaExclamationTriangle } from "react-icons/fa";
 import "react-datepicker/dist/react-datepicker.css";
 import { useRouter } from "next/navigation";
 
 // --- Interface Definitions ---
-export interface So2 {
+
+// FIX: Define a shared base interface for clarity and to eliminate dynamic 'any' access
+interface BaseGas {
   id: number;
-  so2_name: string;
-  so2: number;
   aod: number;
   o3: number;
   flag: number;
 }
 
-export interface No2 {
-  id: number;
+export interface So2 extends BaseGas {
+  so2_name: string;
+  so2: number;
+}
+
+export interface No2 extends BaseGas {
   no2_name: string;
   no2: number;
-  aod: number;
-  o3: number;
-  flag: number;
   slant: number | null;
 }
 
-export interface Choho {
-  id: number;
+export interface Choho extends BaseGas {
   choho_name: string;
   choho: number;
-  aod: number;
-  o3: number;
-  flag: number;
 }
 
 export interface Ges {
@@ -71,13 +68,42 @@ export interface Location {
 }
 
 type ViewMode = "day" | "week" | "month";
-type GasVariable = 'so2' | 'no2' | 'aod' | 'o3';
+type GasVariable = 'so2' | 'no2' | 'aod' | 'o3'; // ไม่ได้ใช้แต่เก็บไว้เผื่ออนาคต
 type No2Type = "so2" | "no2" | "choho";
 
 const availableNo2Types: No2Type[] = ["so2", "no2", "choho"];
 
-// Define a union type for the elements in the gas data arrays
+// Type Union ที่ใช้แทน GasDataElement | {} (เพื่อเลี่ยงการใช้ {})
 type GasDataElement = So2 | No2 | Choho;
+type GasDataElementOrNull = GasDataElement | null;
+
+
+// -------------------------------------------------------------
+// HELPER FUNCTION: Type-safe lookup for dynamic gas property
+// -------------------------------------------------------------
+/**
+ * Lookup the main gas value (so2, no2, or choho) from the specific gas object.
+ * @param data The specific gas object (So2, No2, or Choho).
+ * @param type The selected gas type ('so2', 'no2', or 'choho').
+ * @returns The gas concentration value (number) or null if not found.
+ */
+function getGasValue(data: GasDataElementOrNull, type: No2Type): number | null {
+    if (!data) return null;
+    
+    // Use type guards or property checks to safely access the specific gas concentration
+    if (type === 'so2' && 'so2' in data) {
+        return data.so2;
+    }
+    if (type === 'no2' && 'no2' in data) {
+        return data.no2;
+    }
+    if (type === 'choho' && 'choho' in data) {
+        return data.choho;
+    }
+    return null;
+}
+// -------------------------------------------------------------
+
 
 function GasDataPage() {
   const [locationData, setLocationData] = useState<Location[]>([]);
@@ -88,17 +114,26 @@ function GasDataPage() {
   const [selectedNo2Type, setSelectedNo2Type] = useState<No2Type>('so2');
   const [filteredData, setFilteredData] = useState<Ges[]>([]);
   const router = useRouter();
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const rs = await fetch("http://weather-cass.online:3001/api/ShowData");
-        const data: Location[] = await rs.json();
+        // FIX: Explicitly type the raw data as 'unknown' or the expected return type
+        const rawData: unknown = await rs.json();
 
-        const processedData: Location[] = data.map((loc: Location) => ({
+        // FIX: Ensure rawData is an array and assert its type
+        if (!Array.isArray(rawData)) {
+            console.error("Fetched data is not an array.");
+            return;
+        }
+
+        // FIX: Use explicit types in map functions to avoid 'any'
+        const processedData: Location[] = rawData.map((loc: Location) => ({
           ...loc,
-          locationges_id: loc.locationges_id.map(locGes => ({
+          locationges_id: loc.locationges_id.map((locGes: LocationGes) => ({
             ...locGes,
-            ges_id: locGes.ges_id.map(gesData => ({
+            ges_id: locGes.ges_id.map((gesData: Ges) => ({
               ...gesData,
               date: new Date(gesData.year, gesData.month - 1, gesData.day, gesData.hours)
             }))
@@ -189,18 +224,19 @@ function GasDataPage() {
     </div>
   );
 
-  // 🛑 FIX: Use a type guard to safely access the array element
-  let latestValue: GasDataElement | null = null;
-  
+  // FIX: Type this variable correctly using the union type
+  let latestValue: GasDataElementOrNull = null;
+  
   if (latestStationData) {
     // Dynamically construct the key like "so2_id" or "no2_id"
-    const key = `${selectedNo2Type}_id` as keyof Pick<Ges, "so2_id" | "no2_id" | "choho_id">;
-    
-    // The type of `value` is now correctly inferred as `So2[] | No2[] | Choho[]`
+    // FIX: Use a mapped type to safely assert the key type, eliminating 'as keyof Pick<...>' and 'any'
+    const key = `${selectedNo2Type}_id` as 'so2_id' | 'no2_id' | 'choho_id';
+    
+    // FIX: The type of `value` is now correctly inferred as `So2[] | No2[] | Choho[]`
     const value = latestStationData[key];
 
-    if (Array.isArray(value) && value.length > 0) {
-      // Safely access the first element
+    if (value.length > 0) {
+      // FIX: Safely access the first element and let TypeScript infer the union type
       latestValue = value[0] as GasDataElement;
     }
   }
@@ -222,26 +258,30 @@ function GasDataPage() {
     try {
       const headers = ["Date-Time", selectedNo2Type.toUpperCase(), "AOD", "O3"];
 
-      const rows = filteredData.map(d => {
-        const so2Data = d.so2_id[0] ?? {};
-        const no2Data = d.no2_id[0] ?? {};
-        const chohoData = d.choho_id[0] ?? {};
+      const rows = filteredData.map((d: Ges) => { // Explicitly type 'd'
 
-        // This ensures valueData has the correct array element type
-        const valueData: GasDataElement | {} =
+        // FIX: Use null instead of {} to avoid linting error
+        const so2Data: So2 | null = d.so2_id[0] ?? null;
+        const no2Data: No2 | null = d.no2_id[0] ?? null;
+        const chohoData: Choho | null = d.choho_id[0] ?? null;
+
+        // FIX: Determine the correct type-safe data object
+        const valueData: GasDataElementOrNull =
           selectedNo2Type === "so2" ? so2Data :
           selectedNo2Type === "no2" ? no2Data : chohoData;
 
-        // Use the correct indexing key for dynamic access
-        const gasValue = (valueData as any)[selectedNo2Type] ?? "-";
-        const aodValue = (valueData as any).aod ?? "-";
-        const o3Value = (valueData as any).o3 ?? "-";
+        // FIX: Use the type-safe helper function
+        const gasValue = getGasValue(valueData, selectedNo2Type);
+
+        // FIX: Safely access AOD and O3, which are on the BaseGas interface
+        const aodValue = valueData?.aod ?? null;
+        const o3Value = valueData?.o3 ?? null;
 
         return [
           `${d.day.toString().padStart(2, '0')}/${d.month.toString().padStart(2, '0')} ${d.hours.toString().padStart(2, '0')}:00`,
-          typeof gasValue === 'number' ? gasValue.toFixed(2) : gasValue,
-          typeof aodValue === 'number' ? aodValue.toFixed(2) : aodValue,
-          typeof o3Value === 'number' ? o3Value.toFixed(2) : o3Value,
+          gasValue !== null ? gasValue.toFixed(2) : "-",
+          aodValue !== null ? aodValue.toFixed(2) : "-",
+          o3Value !== null ? o3Value.toFixed(2) : "-",
         ];
       });
 
@@ -258,7 +298,9 @@ function GasDataPage() {
       const link = document.createElement("a");
       link.setAttribute("href", url);
       link.setAttribute("download", filename);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (error) {
       console.error("Error downloading CSV:", error);
       alert("เกิดข้อผิดพลาดในการดาวน์โหลด CSV");
@@ -358,8 +400,7 @@ function GasDataPage() {
             </div>
             <div className="text-center">
               <FaSmog className="text-5xl text-yellow-500 mx-auto mb-2" />
-              {/* Access selected gas value safely, casting to 'any' for the dynamic property access */}
-              <p className="text-4xl font-extrabold text-amber-600">{(latestValue as any)?.[selectedNo2Type]?.toFixed(2) ?? '-'}</p>
+              <p className="text-4xl font-extrabold text-amber-600">{getGasValue(latestValue, selectedNo2Type)?.toFixed(2) ?? '-'}</p>
               <p className="mt-1 text-lg font-semibold text-gray-700">{selectedNo2Type.toUpperCase()}</p>
             </div>
           </div>
@@ -391,26 +432,32 @@ function GasDataPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((d, idx) => {
-                  const so2Data = d.so2_id[0] ?? {};
-                  const no2Data = d.no2_id[0] ?? {};
-                  const chohoData = d.choho_id[0] ?? {};
-                  
-                  // Cast the result to 'any' for dynamic property access
-                  const valueData: any = selectedNo2Type === "so2"
+                {filteredData.map((d: Ges, idx) => {
+                  const so2Data: So2 | null = d.so2_id[0] ?? null;
+                  const no2Data: No2 | null = d.no2_id[0] ?? null;
+                  const chohoData: Choho | null = d.choho_id[0] ?? null;
+                  
+                  // Select the correct gas data object
+                  const valueData: GasDataElementOrNull = selectedNo2Type === "so2"
                     ? so2Data
                     : selectedNo2Type === "no2"
                       ? no2Data
                       : chohoData;
+                    
+                    // Get values using the type-safe function or optional chaining
+                    const gasValue = getGasValue(valueData, selectedNo2Type);
+                    const aodValue = valueData?.aod ?? null;
+                    const o3Value = valueData?.o3 ?? null;
+
 
                   return (
                     <tr key={idx} className="hover:bg-yellow-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {d.day.toString().padStart(2, '0')}/{d.month.toString().padStart(2, '0')} {d.hours.toString().padStart(2, '0')}:00
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-amber-600">{valueData?.[selectedNo2Type]?.toFixed(2) ?? '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{valueData?.aod?.toFixed(2) ?? '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{valueData?.o3?.toFixed(2) ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-amber-600">{gasValue?.toFixed(2) ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{aodValue?.toFixed(2) ?? '-'}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{o3Value?.toFixed(2) ?? '-'}</td>
                     </tr>
                   )
                 })}
