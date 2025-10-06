@@ -5,6 +5,13 @@ import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
 import { FaBars, FaCaretDown, FaUser } from "react-icons/fa";
 
+interface ProfileData {
+  id: string;
+  email: string;
+  name?: string;
+}
+
+
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -13,7 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [showSubMenu, setShowSubMenu] = useState(false);
   const [showGasSubMenu, setShowGasSubMenu] = useState(false);
   const [boolean_token, setBoolean_Token] = useState<boolean>(false);
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   useEffect(() => {
@@ -87,25 +94,26 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <span className="hidden sm:inline">โปรไฟล์</span>
               </div>
 
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-12 w-52 bg-white text-gray-800 rounded-xl shadow-2xl z-50 transform origin-top-right animate-fade-in">
-                
-                <div className="p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl" onClick={() => setShowProfileMenu(prev => !prev)}>
-                  <p className="font-semibold text-sm truncate">{profileData.email}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">ID: {profileData.id}</p>
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-12 w-52 bg-white text-gray-800 rounded-xl shadow-2xl z-50">
+                  <div
+                    className="p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl"
+                    onClick={() => setShowProfileMenu(prev => !prev)}
+                  >
+                    <p className="font-semibold text-sm truncate">{profileData?.email || "ไม่พบอีเมล"}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">ID: {profileData?.id || "ไม่พบ ID"}</p>
+                  </div>
+                  <button
+                    className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 hover:text-red-700 rounded-b-xl"
+                    onClick={handleLogout}
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    ออกจากระบบ
+                  </button>
                 </div>
-                
-                <button
-                  className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 hover:text-red-700 transition duration-150 rounded-b-xl"
-                  onClick={handleLogout}
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  ออกจากระบบ
-                </button>
-              </div>
-            )}
+              )}
             </div>
           ) : (
             <button
