@@ -85,7 +85,7 @@ const Ges = () => {
   useEffect(() => {
     const fn_apishow = async () => {
       try {
-        const rs_data = await fetch("http://weather-cass.online:3001/api/locationget");
+        const rs_data = await fetch("https://weather-cass.online/api/locationget");
         const api_json = await rs_data.json();
         setLocation_data(api_json.Location_find);
       } catch (err) {
@@ -111,7 +111,7 @@ const Ges = () => {
     try {
 
         console.log(data_save, tempMarker.lat, tempMarker.lng)
-      const rs_save = await fetch("http://weather-cass.online:3001/api/location_ges_SAVE", {
+      const rs_save = await fetch("https://weather-cass.online/api/location_ges_SAVE", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

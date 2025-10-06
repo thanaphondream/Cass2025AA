@@ -66,10 +66,10 @@ function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rs = await fetch("http://weather-cass.online:3001/api/weather/3hoursweather");
+        const rs = await fetch("https://weather-cass.online/api/weather/3hoursweather");
         const rs_json: Location[] = await rs.json();
 
-        const rs_weather = await fetch("http://weather-cass.online:3001/api/DataWhatherNow");
+        const rs_weather = await fetch("https://weather-cass.online/api/DataWhatherNow");
         const rs_json2: WeatherResponse = await rs_weather.json();
 
         setWeather_data(rs_json2);

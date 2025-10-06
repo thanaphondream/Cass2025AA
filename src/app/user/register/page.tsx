@@ -118,7 +118,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const resCheck = await fetch(`http://weather-cass.online:3001/api/check-emil/${form.email}`);
+      const resCheck = await fetch(`https://weather-cass.online/api/check-emil/${form.email}`);
       const checkData = await resCheck.json();
 
       if (checkData.Data !== true) {
@@ -130,7 +130,7 @@ export default function RegisterPage() {
       const otp = generateOTP();
       setServerOtp(otp);
 
-      const emailRes = await fetch("http://weather-cass.online:3001/api/send-email", {
+      const emailRes = await fetch("https://weather-cass.online/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -166,7 +166,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const res = await fetch("http://weather-cass.online:3001/api/register-user", {
+      const res = await fetch("https://weather-cass.online/api/register-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

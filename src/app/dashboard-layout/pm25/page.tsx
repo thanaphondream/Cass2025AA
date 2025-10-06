@@ -104,7 +104,7 @@ function Page() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const rs = await fetch('http://weather-cass.online:3001/api/V');
+                const rs = await fetch('https://weather-cass.online/api/V');
                 const data: Location[] = await rs.json();
                 setLocationData(data);
 
@@ -201,7 +201,7 @@ function Page() {
 
         const fetchData = async () => {
             try {
-                const rs_now = await fetch(`http://weather-cass.online:3001/api/airpm/nowdata/${Number(selectedStation)}`);
+                const rs_now = await fetch(`https://weather-cass.online/api/airpm/nowdata/${Number(selectedStation)}`);
                 const rs_json_now: NowData = await rs_now.json();
                 setDataNow(rs_json_now);
             } catch (error) {

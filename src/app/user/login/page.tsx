@@ -32,7 +32,7 @@ export default function LoginPage() {
     }
 
     try {
-      const res = await axios.post("http://weather-cass.online:3001/api/login-user", form);
+      const res = await axios.post("https://weather-cass.online/api/login-user", form);
       console.log("Login Success:", res.data.message);
 
       localStorage.setItem("token", res.data.token);

@@ -16,7 +16,7 @@ const AddStation = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const rs = await fetch('http://weather-cass.online:3001/api/station/length');
+                const rs = await fetch('https://weather-cass.online/api/station/length');
                 const data = await rs.json();
 
                 setData_length({

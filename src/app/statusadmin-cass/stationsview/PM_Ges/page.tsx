@@ -65,7 +65,7 @@ function Page() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rs = await fetch('http://weather-cass.online:3001/api/V');
+        const rs = await fetch('https://weather-cass.online/api/V');
         const data = await rs.json();
         setLocationData(data);
       } catch (error) {

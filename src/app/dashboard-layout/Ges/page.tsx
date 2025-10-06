@@ -118,7 +118,7 @@ function GasDataPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rs = await fetch("http://weather-cass.online:3001/api/ShowData");
+        const rs = await fetch("https://weather-cass.online/api/ShowData");
         // FIX: Explicitly type the raw data as 'unknown' or the expected return type
         const rawData: unknown = await rs.json();
 

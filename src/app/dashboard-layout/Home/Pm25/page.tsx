@@ -58,7 +58,7 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("http://weather-cass.online:3001/api/latest");
+        const response = await fetch("https://weather-cass.online/api/latest");
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const jsondata: LocationData[] = await response.json();

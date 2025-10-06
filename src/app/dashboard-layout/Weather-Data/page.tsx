@@ -71,7 +71,7 @@ function Page() {
     const fetchData = async () => {
       try {
         // เปลี่ยน fetch เป็น API endpoint จริงของคุณ
-        const rs = await fetch("http://weather-cass.online:3001/api/weather/3hoursweather");
+        const rs = await fetch("https://weather-cass.online/api/weather/3hoursweather");
         const data = await rs.json();
 
         const processedData: Location[] = data.map((loc: Location) => ({

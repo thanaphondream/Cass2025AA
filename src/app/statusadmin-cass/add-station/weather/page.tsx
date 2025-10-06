@@ -93,7 +93,7 @@ const Weather = () => {
     const fetchLocations = async () => {
       try {
         const response = await fetch(
-          "http://weather-cass.online:3001/api/locationget"
+          "https://weather-cass.online/api/locationget"
         );
         const data = await response.json();
         setLocationData(data.Location_find);
@@ -118,7 +118,7 @@ const Weather = () => {
     }
 
     try {
-      const response = await fetch("http://weather-cass.online:3001/api/weather", {
+      const response = await fetch("https://weather-cass.online/api/weather", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

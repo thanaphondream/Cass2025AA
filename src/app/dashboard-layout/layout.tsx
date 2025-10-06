@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (token: string) => {
     try {
-      const res = await fetch("http://weather-cass.online:3001/api/decode-token", {
+      const res = await fetch("https://weather-cass.online/api/decode-token", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
