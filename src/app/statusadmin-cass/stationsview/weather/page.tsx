@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { ReactNode } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import { LocalizationProvider, MobileDatePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -246,7 +247,7 @@ interface WeatherTableProps {
   regionName?: string;
   stationName?: string;
   province?: string;
-  renderPagination: (totalPages: number, handleChange: (page: number) => void) => JSX.Element;
+  renderPagination: (totalPages: number, handleChange: (page: number) => void) => ReactNode;
   totalPages: number;
   handlePageChange: (page: number) => void;
 }
