@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react'
 import DatePicker from 'react-datepicker'
 import { FaDownload, FaCloudSun, FaThermometerHalf, FaTint, FaCloudShowersHeavy, FaWind, FaMapMarkerAlt } from "react-icons/fa"
 import "react-datepicker/dist/react-datepicker.css"
-import WeatherChart from './WeatherChart'
+// import WeatherChart from './WeatherChart'
 import { useRouter } from "next/navigation";
 
 // --- Interface Definitions ---
@@ -387,7 +387,7 @@ const downloadFullCSV = () => {
             </div>
         )}
         
-        <div className="border p-4 rounded-lg shadow-lg bg-white">
+{/*         <div className="border p-4 rounded-lg shadow-lg bg-white">
           {isStationSelected && hasFilteredData ? (
             <WeatherChart
               filteredData={filteredData}
@@ -398,7 +398,7 @@ const downloadFullCSV = () => {
           ) : (
             noDataMessage
           )}
-        </div>
+        </div> */}
       </div>
 
       <hr className="my-8" />
