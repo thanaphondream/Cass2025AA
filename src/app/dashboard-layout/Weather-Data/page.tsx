@@ -50,20 +50,22 @@ export interface Location {
   station_weather_id: Weather[];
 }
 
+
+
 type ViewMode = "day" | "week" | "month";
 type WeatherVariable = 'temperaturde' | 'humidity' | 'rain' | 'windspeed10m' | 'slp';
 
 type WeatherDataKey = keyof hours3weather;
 
 function Page() {
-  const [locationData, setLocationData] = useState<Location[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<string>('');
-  const [selectedStation, setSelectedStation] = useState<string>('');
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-  const [viewMode, setViewMode] = useState<ViewMode>("day");
-  const [selectedVariable, setSelectedVariable] = useState<WeatherVariable>('temperaturde');
-  const [filteredData, setFilteredData] = useState<hours3weather[]>([]);
-  const router = useRouter();
+  const [locationData, setLocationData] = useState<Location[]>([])
+  const [selectedRegion, setSelectedRegion] = useState<string>('')
+  const [selectedStation, setSelectedStation] = useState<string>('')
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
+  const [viewMode, setViewMode] = useState<ViewMode>("day")
+  const [selectedVariable, setSelectedVariable] = useState<WeatherVariable>('temperaturde')
+  const [filteredData, setFilteredData] = useState<hours3weather[]>([])
+  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -184,6 +186,17 @@ function Page() {
       alert("No data available for download");
       return;
     }
+
+      const getVariableDetails = (variable: WeatherVariable) => {
+    switch (variable) {
+      case 'temperaturde': return { label: 'อุณหภูมิ (°C)', color: 'red' }
+      case 'humidity': return { label: 'ความชื้น (%)', color: 'blue' }
+      case 'rain': return { label: 'ปริมาณฝน (มม./ชม.)', color: 'green' }
+      case 'windspeed10m': return { label: 'ความเร็วลม (m/s)', color: 'purple' }
+      case 'slp': return { label: 'ความกดอากาศ (hPa)', color: 'orange' }
+      default: return { label: '', color: 'gray' }
+    }
+  }
 
     // Headers (All)
     const headers = [
@@ -317,6 +330,9 @@ function Page() {
           />
         </div>
 
+
+        
+
         {/* View Mode Buttons */}
         <div className="flex gap-2">
           <button onClick={() => setViewMode("day")} className={`px-4 py-2 rounded-lg font-semibold transition duration-150 ${viewMode === "day" ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}>รายวัน</button>
@@ -390,10 +406,10 @@ function Page() {
         <div className="border p-6 rounded-xl shadow-xl bg-white transition-all duration-300">
           {isStationSelected && hasFilteredData ? (
             <WeatherChart
-              filteredData={filteredData}
-              viewMode={viewMode}
-              selectedVariable={selectedVariable}
-              getVariableDetails={getVariableDetails}
+                filteredData={filteredData}
+                selectedVariable={selectedVariable}
+                variableLabel={getVariableDetails(selectedVariable).label}
+                variableColor={getVariableDetails(selectedVariable).color}
             />
           ) : (
             noDataMessage
