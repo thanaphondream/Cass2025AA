@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("https://weather-cass.online/api/check-auth", {
+        const res = await fetch("http://localhost:3001/api/check-auth", {
           method: "GET",
           credentials: "include",
         });
@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      await fetch("https://weather-cass.online/api/logout", {
+      await fetch("http://localhost:3001/api/logout", {
         method: "POST",
         credentials: "include",
       });
