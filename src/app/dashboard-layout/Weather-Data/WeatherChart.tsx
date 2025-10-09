@@ -1,5 +1,4 @@
-// WeatherChart.tsx
-'use client'
+'use client';
 
 import React from 'react';
 import {
@@ -11,41 +10,76 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  TooltipProps,
 } from 'recharts';
-import {hours3weather}  from './page'; 
+import { hours3weather } from './page';
+
 interface WeatherChartProps {
   filteredData: hours3weather[];
   viewMode: 'day' | 'week' | 'month';
   selectedVariable: 'temperaturde' | 'humidity' | 'rain' | 'windspeed10m' | 'slp';
-  getVariableDetails: (variable: 'temperaturde' | 'humidity' | 'rain' | 'windspeed10m' | 'slp') => {
+  getVariableDetails: (
+    variable: 'temperaturde' | 'humidity' | 'rain' | 'windspeed10m' | 'slp'
+  ) => {
     label: string;
     icon: React.ElementType;
     color: string;
   };
 }
 
+// ✅ ประกาศ type สำหรับ Tooltip อย่างถูกต้อง
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  getVariableDetails: (
+    variable: 'temperaturde' | 'humidity' | 'rain' | 'windspeed10m' | 'slp'
+  ) => {
+    label: string;
+    icon: React.ElementType;
+    color: string;
+  };
+  selectedVariable: 'temperaturde' | 'humidity' | 'rain' | 'windspeed10m' | 'slp';
+}
+
 const formatXAxis = (timestamp: number, viewMode: WeatherChartProps['viewMode']) => {
   const date = new Date(timestamp);
   if (viewMode === 'day') {
-    return `${date.getHours().toString().padStart(2, '0')}:00`; 
+    return `${date.getHours().toString().padStart(2, '0')}:00`;
   }
-  return `${date.getMonth() + 1}/${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:00`; 
+  return `${date.getMonth() + 1}/${date.getDate()} ${date
+    .getHours()
+    .toString()
+    .padStart(2, '0')}:00`;
 };
 
-const CustomTooltip = ({ active, payload, label, getVariableDetails, selectedVariable }: any) => {
+// ✅ Tooltip พร้อม type ถูกต้อง
+const CustomTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+  getVariableDetails,
+  selectedVariable,
+}) => {
   if (active && payload && payload.length) {
     const details = getVariableDetails(selectedVariable);
-    const date = new Date(label);
-    const dateStr = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:00`;
+    const date = new Date(label as number);
+    const dateStr = `${date.getDate().toString().padStart(2, '0')}/${(
+      date.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:00`;
 
     return (
       <div className="p-3 bg-white border border-gray-300 shadow-lg rounded-lg text-sm">
         <p className="font-bold text-gray-700 mb-1">{dateStr}</p>
         <p className="text-sm" style={{ color: details.color }}>
-          {details.label}: <span className="font-semibold">
-            {payload[0].value.toFixed(
-              selectedVariable === 'rain' || selectedVariable === 'temperaturde' || selectedVariable === 'humidity' || selectedVariable === 'windspeed10m'
-                ? 1 : 2
+          {details.label}:{' '}
+          <span className="font-semibold">
+            {Number(payload[0].value).toFixed(
+              selectedVariable === 'rain' ||
+                selectedVariable === 'temperaturde' ||
+                selectedVariable === 'humidity' ||
+                selectedVariable === 'windspeed10m'
+                ? 1
+                : 2
             )}
           </span>
         </p>
@@ -55,7 +89,6 @@ const CustomTooltip = ({ active, payload, label, getVariableDetails, selectedVar
   return null;
 };
 
-
 const WeatherChart: React.FC<WeatherChartProps> = ({
   filteredData,
   viewMode,
@@ -64,8 +97,8 @@ const WeatherChart: React.FC<WeatherChartProps> = ({
 }) => {
   const details = getVariableDetails(selectedVariable);
 
-  const chartData = filteredData.map(d => ({
-    time: d.date.getTime(), 
+  const chartData = filteredData.map((d) => ({
+    time: d.date.getTime(),
     [selectedVariable]: d[selectedVariable],
   }));
 
@@ -85,17 +118,32 @@ const WeatherChart: React.FC<WeatherChartProps> = ({
           <XAxis
             dataKey="time"
             tickFormatter={(value) => formatXAxis(value, viewMode)}
-            label={{ value: viewMode === 'day' ? 'เวลา' : 'วัน-เวลา', position: 'bottom', offset: 0, fill: '#4b5563' }}
+            label={{
+              value: viewMode === 'day' ? 'เวลา' : 'วัน-เวลา',
+              position: 'bottom',
+              offset: 0,
+              fill: '#4b5563',
+            }}
             minTickGap={20}
             angle={-20}
             textAnchor="end"
             height={50}
           />
           <YAxis
-            label={{ value: details.label, angle: -90, position: 'left', fill: '#4b5563' }}
+            label={{
+              value: details.label,
+              angle: -90,
+              position: 'left',
+              fill: '#4b5563',
+            }}
           />
           <Tooltip
-            content={<CustomTooltip getVariableDetails={getVariableDetails} selectedVariable={selectedVariable} />}
+            content={
+              <CustomTooltip
+                getVariableDetails={getVariableDetails}
+                selectedVariable={selectedVariable}
+              />
+            }
           />
           <Legend wrapperStyle={{ paddingTop: '20px' }} />
           <Line
