@@ -22,17 +22,14 @@ const WeatherChart: React.FC<WeatherChartProps> = ({
   viewMode
 }) => {
 
-  // ✅ ถ้าเป็นรายเดือนหรือรายสัปดาห์ → ทำค่าเฉลี่ยรายวัน
   const chartData = useMemo(() => {
     if (viewMode === 'day') {
-      // ❌ ไม่ทำค่าเฉลี่ย ใช้ข้อมูลดิบตามชั่วโมง
       return filteredData.map(d => ({
         time: `${String(d.day).padStart(2, '0')}/${String(d.month).padStart(2, '0')} ${String(d.hours).padStart(2, '0')}:00`,
         value: Number(d[selectedVariable])
       }))
     }
 
-    // ✅ กรณีรายสัปดาห์หรือรายเดือน → ทำค่าเฉลี่ยรายวัน
     const grouped: Record<string, number[]> = {}
 
     filteredData.forEach(d => {
