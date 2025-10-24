@@ -111,8 +111,6 @@ const Ari4thai = () => {
     }
 
     try {
-
-        console.log(data_save, tempMarker.lat, tempMarker.lng)
       const rs_save = await fetch("https://weather-cass.online/api/airqualitystation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -126,7 +124,7 @@ const Ari4thai = () => {
       if (!rs_save.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
 
       const result = await rs_save.json();
-      console.log("บันทึกสำเร็จ:", result);
+
       alert("บันทึกข้อมูลเรียบร้อยแล้ว ✅");
       setTempMarker(null);
     } catch (error) {

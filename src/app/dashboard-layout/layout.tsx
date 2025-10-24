@@ -65,7 +65,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       const data = await res.json();
       setProfileData(data.payload);
     } catch (error) {
-      console.error("เกิดข้อผิดพลาด:", error);
+      // console.error("เกิดข้อผิดพลาด:", error);
     }
   };
 
@@ -101,7 +101,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     onClick={() => setShowProfileMenu(prev => !prev)}
                   >
                     <p className="font-semibold text-sm truncate">{profileData?.email || "ไม่พบอีเมล"}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">ID: {profileData?.id || "ไม่พบ ID"}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">ID: {profileData?.name || "ไม่พบ ID"}</p>
                   </div>
                   <button
                     className="flex items-center w-full px-4 py-2.5 text-sm text-red-600 font-medium hover:bg-red-50 hover:text-red-700 rounded-b-xl"

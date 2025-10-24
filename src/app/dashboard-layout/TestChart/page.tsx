@@ -40,7 +40,7 @@
 // //         item.pm25_id.length > 0 ? item.pm25_id[0].value : null
 // //       );
 
-// //       console.log(pm25, labels)
+
 
 // //       const pmMax = pm25.reduce((max: number, value: number | null) => {
 // //         if (value !== null && value > max) { 

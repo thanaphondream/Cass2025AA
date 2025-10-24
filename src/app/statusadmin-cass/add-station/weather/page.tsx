@@ -131,7 +131,7 @@ const Weather = () => {
       if (!response.ok) throw new Error("ไม่สามารถบันทึกข้อมูลได้");
 
       const result = await response.json();
-      console.log("บันทึกสำเร็จ:", result);
+
       alert("บันทึกข้อมูลเรียบร้อยแล้ว ✅");
       setTempMarker(null);
     } catch (error) {

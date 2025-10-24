@@ -109,8 +109,6 @@ const Ges = () => {
     }
 
     try {
-
-        console.log(data_save, tempMarker.lat, tempMarker.lng)
       const rs_save = await fetch("https://weather-cass.online/api/location_ges_SAVE", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -131,7 +129,7 @@ const Ges = () => {
         alert(result.DATAERROR); 
         return;
         }
-      console.log("บันทึกสำเร็จ:", result);
+
       alert("บันทึกข้อมูลเรียบร้อยแล้ว ✅");
       setTempMarker(null);
     } catch (error) {

@@ -33,7 +33,7 @@ export default function LoginPage() {
 
     try {
       const res = await axios.post("https://weather-cass.online/api/login-user", form);
-      console.log("Login Success:", res.data.message);
+
 
       localStorage.setItem("token", res.data.token);
 
@@ -126,7 +126,7 @@ export default function LoginPage() {
 
         <p className="mt-4 text-center text-sm text-gray-600">
           ยังไม่มีบัญชี?{" "}
-          <Link href="/register" className="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
+          <Link href="/user/register" className="text-indigo-600 hover:text-indigo-800 font-medium transition duration-150">
             ลงทะเบียนที่นี่
           </Link>
         </p>

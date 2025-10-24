@@ -5,7 +5,7 @@ import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import Chart from './Chart'
 import { useRouter } from "next/navigation";
-import { FaSmileBeam, FaSmile, FaMeh, FaFrown, FaSkullCrossbones, FaCloud, FaBolt } from 'react-icons/fa'; // เพิ่ม FaBolt สำหรับฟ้าผ่า
+import { FaSmileBeam, FaSmile, FaMeh, FaFrown, FaSkullCrossbones, FaCloud, FaBolt, FaSpinner } from 'react-icons/fa'; // เพิ่ม FaSpinner
 
 
 interface Location {
@@ -99,10 +99,12 @@ function Page() {
     const [viewMode, setViewMode] = useState<"day" | "week" | "month">("day");
     const [dataNow, setDataNow] = useState<NowData>();
     const [filteredData, setFilteredData] = useState<LastAQI_Ar4thai[]>([]);
+    const [isLoading, setIsLoading] = useState<boolean>(true); // 👈 เพิ่มสถานะ isLoading
     const router = useRouter();
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true); // 👈 เริ่มโหลด
             try {
                 const rs = await fetch('https://weather-cass.online/api/V');
                 const data: Location[] = await rs.json();
@@ -117,6 +119,8 @@ function Page() {
                 }
             } catch (error) {
                 console.error('Error fetching location data:', error);
+            } finally {
+                setIsLoading(false); // 👈 โหลดเสร็จสิ้น
             }
         };
         fetchData();
@@ -150,22 +154,22 @@ function Page() {
             const rows = dataForDisplay.map(d => {
             const pm25 = d.pm25_id[0] || {};
             const pm10 = d.pm10_id[0] || {};
-            const o3   = d.o3_id[0]   || {};
-            const co   = d.co_id[0]   || {};
-            const no2  = d.no2_id[0]  || {};
-            const so2  = d.so2_id[0]  || {};
-            const api  = d.api[0]     || {};
+            const o3   = d.o3_id[0]   || {};
+            const co   = d.co_id[0]   || {};
+            const no2  = d.no2_id[0]  || {};
+            const so2  = d.so2_id[0]  || {};
+            const api  = d.api[0]     || {};
 
             return [
                 `${d.day.toString().padStart(2, '0')}/${d.month.toString().padStart(2, '0')} ${d.hours.toString().padStart(2, '0')}:00`,
 
                 pm25.id ?? "-", pm25.color_id ?? "-", pm25.aqi ?? "-", pm25.value ?? "-",
                 pm10.id ?? "-", pm10.color_id ?? "-", pm10.aqi ?? "-", pm10.value ?? "-",
-                o3.id ?? "-",   o3.color_id ?? "-",   o3.aqi ?? "-",   o3.value ?? "-",
-                co.id ?? "-",   co.color_id ?? "-",   co.aqi ?? "-",   co.value ?? "-",
-                no2.id ?? "-",  no2.color_id ?? "-",  no2.aqi ?? "-",  no2.value ?? "-",
-                so2.id ?? "-",  so2.color_id ?? "-",  so2.aqi ?? "-",  so2.value ?? "-",
-                api.id ?? "-",  api.color_id ?? "-",  api.aqi ?? "-",  api.value ?? "-"
+                o3.id ?? "-",   o3.color_id ?? "-",   o3.aqi ?? "-",   o3.value ?? "-",
+                co.id ?? "-",   co.color_id ?? "-",   co.aqi ?? "-",   co.value ?? "-",
+                no2.id ?? "-",  no2.color_id ?? "-",  no2.aqi ?? "-",  no2.value ?? "-",
+                so2.id ?? "-",  so2.color_id ?? "-",  so2.aqi ?? "-",  so2.value ?? "-",
+                api.id ?? "-",  api.color_id ?? "-",  api.aqi ?? "-",  api.value ?? "-"
             ];
             });
 
@@ -236,7 +240,7 @@ function Page() {
 
                 filtered = selectedStationData.lastaqi_id.filter(d => {
                     const dDate = new Date(d.year, d.month - 1, d.day);
-                    dDate.setHours(0, 0, 0, 0); 
+                    dDate.setHours(0, 0, 0, 0); 
 
                     const compareSelectedDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
                     const compareStartDate = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
@@ -356,16 +360,37 @@ function Page() {
             </div>
         );
     };
-    const NoDataMessage = ({ selectedStation }: { selectedStation: string }) => {
+    
+    // องค์ประกอบสำหรับแสดงเมื่อไม่มีข้อมูล/กำลังโหลด
+    const NoDataMessage = ({ selectedStation, isLoading }: { selectedStation: string, isLoading: boolean }) => {
         let message = "กรุณาเลือกสถานีที่ต้องการดูข้อมูล";
         let subMessage = "เลือกจากเมนู 'เลือกภูมิภาค' และ 'เลือกสถานี' ด้านบน";
-        let boltClass = "text-yellow-500";
-        const cloudClass = "text-gray-400";
+        let iconDisplay: React.ReactNode;
 
-        if (selectedStation) {
+        if (isLoading) { // 👈 แสดง Loading
+             message = "กำลังโหลดข้อมูลสถานี...";
+             subMessage = "โปรดรอสักครู่";
+             iconDisplay = (
+                 <div className="text-6xl text-blue-500 mb-4">
+                     <FaSpinner className="animate-spin mx-auto" />
+                 </div>
+             );
+        } else if (selectedStation) {
             message = "ไม่พบข้อมูลสำหรับช่วงเวลาที่เลือก";
             subMessage = `กรุณาลองเปลี่ยนวันที่หรือโหมดการแสดงผล (${viewMode})`;
-            boltClass = "text-red-500"; 
+            iconDisplay = (
+                <div className="cloud-icon-container text-6xl">
+                    <FaCloud className="text-gray-400" style={{ transform: 'scale(1.2)' }} />
+                    <FaBolt className={`bolt-icon text-3xl text-red-500`} />
+                </div>
+            );
+        } else {
+             iconDisplay = (
+                 <div className="cloud-icon-container text-6xl">
+                     <FaCloud className="text-gray-400" style={{ transform: 'scale(1.2)' }} />
+                     <FaBolt className={`bolt-icon text-3xl text-yellow-500 opacity-50`} />
+                 </div>
+             );
         }
 
         return (
@@ -380,7 +405,7 @@ function Page() {
                         animation: fade-in 1s ease-out;
                     }
 
-                    /* Custom Keyframes for Cloud/Lightning Animation */
+                    /* Custom Keyframes for Cloud/Lightning Animation (kept for consistency) */
                     @keyframes shake {
                         0%, 100% { transform: translateX(0); }
                         20%, 60% { transform: translateX(-5px); }
@@ -395,31 +420,21 @@ function Page() {
                         position: relative;
                         display: inline-block;
                         margin-bottom: 1rem;
-                        /* เมฆสั่นเล็กน้อยเฉพาะเมื่อเลือกสถานีแล้วแต่ไม่มีข้อมูล */
-                        animation: shake 0.5s infinite alternate; 
+                        animation: shake 0.5s infinite alternate; 
                         animation-play-state: ${selectedStation ? 'running' : 'paused'};
                     }
 
                     .bolt-icon {
                         position: absolute;
-                        bottom: -5px; /* จัดให้อยู่ใต้เมฆ */
+                        bottom: -5px;
                         left: 50%;
                         transform: translateX(-50%);
-                        /* ฟ้าผ่ากระพริบ */
-                        animation: lightning 0.5s 0.2s infinite; 
+                        animation: lightning 0.5s 0.2s infinite; 
                         animation-play-state: ${selectedStation ? 'running' : 'paused'};
                     }
                 `}</style>
 
-                <div className="cloud-icon-container text-6xl">
-                    <FaCloud className={cloudClass} style={{ transform: 'scale(1.2)' }} />
-                    {selectedStation && (
-                        <FaBolt className={`bolt-icon text-3xl ${boltClass}`} />
-                    )}
-                    {!selectedStation && (
-                        <FaBolt className={`bolt-icon text-3xl ${boltClass} opacity-50`} />
-                    )}
-                </div>
+                {iconDisplay}
 
                 <p className="text-xl font-bold mb-2">{message}</p>
                 <p className="text-md">{subMessage}</p>
@@ -430,6 +445,19 @@ function Page() {
     const isStationSelected = !!selectedStation;
     const hasLatestData = !!dataNow?.latest_aqi?.[0];
     const hasHistoricalData = dataForDisplay.length > 0;
+
+    // 👈 หากกำลังโหลด ให้แสดงหน้าโหลดเต็ม
+    if (isLoading) {
+        return (
+            <div className="container mx-auto p-4 flex items-center justify-center min-h-screen">
+                 <div className="text-center p-12 bg-gray-50 rounded-lg text-gray-700">
+                    <FaSpinner className="animate-spin text-6xl text-blue-500 mx-auto mb-4" />
+                    <p className="text-2xl font-bold">กำลังโหลดข้อมูลสถานีทั้งหมด...</p>
+                    <p className="text-lg">โปรดรอสักครู่</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto p-4">
@@ -457,25 +485,24 @@ function Page() {
                     </select>
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">เลือกสถานี:</label>
-                    <select
-                        value={selectedStation}
-                        onChange={(e) => {
-                            setSelectedStation(e.target.value);
-                        }}
-                        className="border border-gray-300 rounded-md p-2 mt-1"
-                    >
-                        <option value="">เลือกสถานี</option>
-                        {locationData
-                            .find((r) => r.id.toString() === selectedRegion)
-                            ?.air_id.map((station) => (
-                                <option key={station.id} value={station.id}>
-                                    {station.nameTH}
-                                </option>
-                            ))}
-                    </select>
-                </div>
+               <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+    <label className="block text-sm font-medium text-gray-700">เลือกสถานี:</label>
+    <select
+        value={selectedStation}
+        onChange={(e) => setSelectedStation(e.target.value)}
+        className="border border-gray-300 rounded-md p-2 w-full max-w-full"
+    >
+        <option value="">เลือกสถานี</option>
+        {locationData
+            .find((r) => r.id.toString() === selectedRegion)
+            ?.air_id.map((station) => (
+                <option key={station.id} value={station.id}>
+                    {station.nameTH}
+                </option>
+            ))}
+    </select>
+</div>
+
                 
 
                 <div>
@@ -561,7 +588,7 @@ function Page() {
                         </div>
                     </div>
                 ) : (
-                    <NoDataMessage selectedStation={selectedStation} />
+                    <NoDataMessage selectedStation={selectedStation} isLoading={isLoading} />
                 )}
             </div>
             <hr className="my-8" />
@@ -575,7 +602,7 @@ function Page() {
                         <Chart filteredData={dataForDisplay} viewMode={viewMode} />
                     ) : (
                         <div className='p-8'>
-                            <NoDataMessage selectedStation={selectedStation} />
+                            <NoDataMessage selectedStation={selectedStation} isLoading={isLoading} />
                         </div>
                     )}
                 </div>
@@ -630,7 +657,7 @@ function Page() {
                         </table>
                     ) : (
                         <div className='p-8'>
-                            <NoDataMessage selectedStation={selectedStation} />
+                            <NoDataMessage selectedStation={selectedStation} isLoading={isLoading} />
                         </div>
                     )}
                 </div>

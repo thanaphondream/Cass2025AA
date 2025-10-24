@@ -1,9 +1,12 @@
-// Page.tsx (Updated)
+
 'use client'
 
 import React, { useState, useEffect, useMemo } from 'react'
 import DatePicker from 'react-datepicker'
-import { FaDownload, FaCloudSun, FaThermometerHalf, FaTint, FaCloudShowersHeavy, FaWind, FaMapMarkerAlt } from "react-icons/fa"
+import { 
+  FaDownload, FaCloudSun, FaThermometerHalf, FaTint, 
+  FaCloudShowersHeavy, FaWind, FaMapMarkerAlt, FaSpinner 
+} from "react-icons/fa"
 import "react-datepicker/dist/react-datepicker.css"
 import WeatherChart from './WeatherChart' 
 import { useRouter } from "next/navigation";
@@ -62,9 +65,10 @@ function Page() {
   const [selectedRegion, setSelectedRegion] = useState<string>('')
   const [selectedStation, setSelectedStation] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date())
-  const [viewMode, setViewMode] = useState<ViewMode>("day")
+  const [viewMode, setViewMode] = useState<'day' | 'week' | 'month'>('day')
   const [selectedVariable, setSelectedVariable] = useState<WeatherVariable>('temperaturde')
   const [filteredData, setFilteredData] = useState<hours3weather[]>([])
+   const [loading, setLoading] = useState<boolean>(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -99,19 +103,19 @@ function Page() {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false); 
       }
     };
     fetchData();
   }, []);
 
-  // 2. Memoized Selected Station Data
   const selectedStationData = useMemo(() => {
     return locationData
       .find(r => r.id.toString() === selectedRegion)
       ?.station_weather_id.find(st => st.id.toString() === selectedStation);
   }, [locationData, selectedRegion, selectedStation]);
 
-  // 3. Filter Data based on date and view mode
   useEffect(() => {
     if (selectedStationData && selectedDate) {
       const year = selectedDate.getFullYear();
@@ -175,85 +179,98 @@ function Page() {
     }
   };
 
-  const downloadFullCSV = () => {
-    if (!localStorage.getItem("token")) {
-      alert("กรุณาเข้าสู่ระบบก่อนดาวน์โหลด");
-      router.push("/user/login");
-      return;
-    }
-
-    if (!selectedStationData || selectedStationData.data3hours_weather_id.length === 0) {
-      alert("No data available for download");
-      return;
-    }
-
-      const getVariableDetails = (variable: WeatherVariable) => {
-    switch (variable) {
-      case 'temperaturde': return { label: 'อุณหภูมิ (°C)', color: 'red' }
-      case 'humidity': return { label: 'ความชื้น (%)', color: 'blue' }
-      case 'rain': return { label: 'ปริมาณฝน (มม./ชม.)', color: 'green' }
-      case 'windspeed10m': return { label: 'ความเร็วลม (m/s)', color: 'purple' }
-      case 'slp': return { label: 'ความกดอากาศ (hPa)', color: 'orange' }
-      default: return { label: '', color: 'gray' }
-    }
+   if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen text-gray-700">
+        <FaSpinner className="animate-spin text-5xl text-blue-500 mb-4" />
+        <p className="text-2xl font-semibold">กำลังโหลดข้อมูลสภาพอากาศ...</p>
+      </div>
+    );
   }
 
-    // Headers (All)
+  if (!loading && locationData.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen text-gray-600">
+        <FaCloudSun className="text-6xl text-gray-400 mb-4" />
+        <p className="text-xl font-semibold">ไม่พบข้อมูลจาก API 😢</p>
+      </div>
+    );
+  }
+
+const downloadFullCSV = () => {
+    if (!localStorage.getItem("token")) {
+        alert("กรุณาเข้าสู่ระบบก่อนดาวน์โหลด");
+        router.push("/user/login");
+        return;
+    }
+
+    if (!selectedStationData || filteredData.length === 0) {
+        alert("ไม่พบข้อมูลในช่วงเวลาที่เลือกสำหรับดาวน์โหลด");
+        return;
+    }
+
     const headers = [
-      "Year",
-      "Month",
-      "Day",
-      "Hours",
-      "Temperature (°C)",
-      "Humidity (%)",
-      "Pressure (hPa)",
-      "Station Pressure (hPa)",
-      "Dew Point (°C)",
-      "Vapor Pressure",
-      "Rain (mm/hr)",
-      "Rain24h (mm)",
-      "Wind Speed (m/s)",
-      "Wind Direction",
-      "Visibility (m)",
+        "Year",
+        "Month",
+        "Day",
+        "Hours",
+        "Temperature (°C)",
+        "Humidity (%)",
+        "Pressure (hPa)",
+        "Station Pressure (hPa)",
+        "Dew Point (°C)",
+        "Vapor Pressure",
+        "Rain (mm/hr)",
+        "Rain24h (mm)",
+        "Wind Speed (m/s)",
+        "Wind Direction",
+        "Visibility (m)",
     ];
 
-    const rows = selectedStationData.data3hours_weather_id.map(d => [
-      d.year,
-      d.month,
-      d.day,
-      d.hours,
-      d.temperaturde.toFixed(1),
-      d.humidity.toFixed(1),
-      d.slp.toFixed(2),
-      d.stationPressure.toFixed(2),
-      d.dewPoint.toFixed(1),
-      d.vaporPressure.toFixed(2),
-      d.rain.toFixed(1),
-      d.rain24h.toFixed(1),
-      d.windspeed10m.toFixed(1),
-      d.winddirdedtion10m,
-      d.visibility ?? "-",
+    const rows = filteredData.map(d => [
+        d.year,
+        d.month,
+        d.day,
+        d.hours,
+        d.temperaturde.toFixed(1),
+        d.humidity.toFixed(1),
+        d.slp.toFixed(2),
+        d.stationPressure.toFixed(2),
+        d.dewPoint.toFixed(1),
+        d.vaporPressure.toFixed(2),
+        d.rain.toFixed(1),
+        d.rain24h.toFixed(1),
+        d.windspeed10m.toFixed(1),
+        d.winddirdedtion10m,
+        d.visibility ?? "-",
     ]);
 
     const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        "data:text/csv;charset=utf-8," +
+        [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
 
+    let dateRangeStr = "";
+    if (viewMode === "day" && selectedDate) {
+        dateRangeStr = selectedDate.toISOString().split("T")[0];
+    } else if (viewMode === "week" && selectedDate) {
+        dateRangeStr = `week_ending_${selectedDate.toISOString().split("T")[0]}`;
+    } else if (viewMode === "month" && selectedDate) {
+        dateRangeStr = `${selectedDate.getFullYear()}-${(selectedDate.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+
     const stationNameEN = selectedStationData?.nameEN?.replace(/\s+/g, "_") || "station";
-    const dateStr = selectedDate ? selectedDate.toISOString().split("T")[0] : "date";
-    const filename = `weather_full_${stationNameEN}_${dateStr}.csv`;
+    const filename = `weather_${viewMode}_${stationNameEN}_${dateRangeStr}.csv`; 
 
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", filename);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+};
 
-  // 8. UI State
   const noDataMessage = (
     <div className="text-center p-12 bg-gray-100 rounded-lg border-dashed border-2 border-gray-300 text-gray-500 text-lg transition-all duration-300">
       <FaCloudSun className="text-4xl mx-auto mb-4 text-gray-400" />
@@ -275,7 +292,6 @@ function Page() {
       </p>
 
       <div className="flex flex-wrap gap-4 items-end p-4 bg-blue-50 rounded-xl shadow-lg mb-8 border border-blue-200">
-        {/* Region Select */}
         <div>
           <label className="block text-sm font-bold text-gray-700">เลือกภูมิภาค:</label>
           <select
@@ -294,7 +310,6 @@ function Page() {
           </select>
         </div>
 
-        {/* Station Select */}
         <div>
           <label className="block text-sm font-bold text-gray-700">เลือกสถานี:</label>
           <select
@@ -315,7 +330,6 @@ function Page() {
           </select>
         </div>
 
-        {/* Date Picker */}
         <div>
           <label className="block text-sm font-bold text-gray-700">เลือกวันที่:</label>
           <DatePicker
@@ -330,10 +344,6 @@ function Page() {
           />
         </div>
 
-
-        
-
-        {/* View Mode Buttons */}
         <div className="flex gap-2">
           <button onClick={() => setViewMode("day")} className={`px-4 py-2 rounded-lg font-semibold transition duration-150 ${viewMode === "day" ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}>รายวัน</button>
           <button onClick={() => setViewMode("week")} className={`px-4 py-2 rounded-lg font-semibold transition duration-150 ${viewMode === "week" ? "bg-blue-600 text-white shadow-md" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}>รายสัปดาห์</button>
@@ -343,7 +353,6 @@ function Page() {
 
       <hr className="my-8 border-gray-300" />
 
-      {/* Current Data Section */}
       <div className="mb-10">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">ข้อมูลปัจจุบัน 📊</h2>
         {latestStationData && selectedStationData && hasFilteredData ? (
@@ -380,7 +389,6 @@ function Page() {
 
       <hr className="my-8 border-gray-300" />
 
-      {/* Chart Section */}
       <div className="mb-10">
         <h2 className="text-2xl font-bold mb-4 text-gray-800">กราฟข้อมูลสภาพอากาศ ({getVariableDetails(selectedVariable).label.split('(')[0].trim()} - {viewMode}) 📈</h2>
         {isStationSelected && hasFilteredData && (
@@ -405,12 +413,14 @@ function Page() {
 
         <div className="border p-6 rounded-xl shadow-xl bg-white transition-all duration-300">
           {isStationSelected && hasFilteredData ? (
-            <WeatherChart
-                filteredData={filteredData}
-                selectedVariable={selectedVariable}
-                variableLabel={getVariableDetails(selectedVariable).label}
-                variableColor={getVariableDetails(selectedVariable).color}
+           <WeatherChart
+              filteredData={filteredData}
+              selectedVariable={selectedVariable}
+              variableLabel={getVariableDetails(selectedVariable).label}
+              variableColor={getVariableDetails(selectedVariable).color}
+              viewMode={viewMode}
             />
+
           ) : (
             noDataMessage
           )}
@@ -419,7 +429,6 @@ function Page() {
 
       <hr className="my-8 border-gray-300" />
 
-      {/* Table Section */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-800">ตารางข้อมูลสภาพอากาศ ({viewMode}) 📋</h2>
