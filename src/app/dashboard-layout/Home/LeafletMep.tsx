@@ -75,7 +75,7 @@ const LeafletMap: React.FC<LeafletMapProps> = ({ locationdata }) => {
   return (
     <MapContainer
       center={[11.0, 100.0]}
-      zoom={5}
+      zoom={6}
       style={{ height: "600px", width: "100%" }}
       attributionControl={false}
     >

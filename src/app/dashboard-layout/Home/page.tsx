@@ -64,7 +64,7 @@ export default function HomePage() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("http://localhost:3001/api/weatherstationnow");
+        const response = await fetch("https://weather-cass.online/api/weatherstationnow");
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
         const jsondata: LocationData[] = await response.json();
@@ -152,7 +152,7 @@ export default function HomePage() {
       </div>
 
       <h1 className="text-3xl md:text-4xl font-extrabold mb-8 text-center text-blue-700 animate-fade-in-down">
-        ค่าพยากรอากาศในแต่ละสถานี
+        สภาพอากาศในแต่ละสถานี
       </h1>
 
       <div className="mb-12 h-96 rounded-lg overflow-hidden shadow-lg">
@@ -161,7 +161,7 @@ export default function HomePage() {
 
       <div className="mt-10">
         <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800 border-b-2 border-blue-200 pb-2">
-          ✨ สถานีที่มีข้อมูลล่าสุด
+          สถานีที่มีข้อมูลล่าสุด
         </h2>
 
         {filteredLocations.length === 0 ? (
@@ -174,7 +174,7 @@ export default function HomePage() {
                 className="bg-white p-6 rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1"
               >
                 <h3 className="font-extrabold text-2xl text-indigo-700 mb-3 border-b-2 border-indigo-100 pb-2">
-                  📍 {loc.nameTH}
+                   {loc.nameTH}
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
                   🕒 อัปเดตล่าสุด:{" "}

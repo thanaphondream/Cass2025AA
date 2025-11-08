@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   const fetchProfile = async (token: string) => {
     try {
-      const res = await fetch("https://weather-cass.online/api/decode-token", {
+      const res = await fetch("http://localhost:3001/api/decode-token", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           >
             &#9776;
           </button>
-          <span className="font-bold text-lg">ระบบจัดการบ้าน</span>
+          <span className="font-bold text-lg">เก็บข้อมูลสภาพอากาศ</span>
         </div>
 
         <div className="flex items-center space-x-4 relative">
@@ -161,7 +161,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                       <Link
                         href="/dashboard-layout/Weather-Data"
                         className={`hover:text-blue-400 ${
-                          pathname === "/dashboard-layout/Download" ? "text-blue-400 font-semibold" : ""
+                          pathname === "/dashboard-layout/Weather-Data" ? "text-blue-400 font-semibold" : ""
                         }`}
                       >
                       สภาพอากาศในแต่ละสถานี

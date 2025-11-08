@@ -84,9 +84,9 @@ export default function LeafletPmMap({ locationdata }: { locationdata: LocationD
 
   return (
     <MapContainer
-      center={[15.0, 100.0]}
+      center={[11.0, 100.0]}
       zoom={6}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "600px", width: "100%" }}
     >
       <TileLayer
         attribution="© OpenStreetMap"

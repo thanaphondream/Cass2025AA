@@ -288,7 +288,7 @@ const downloadFullCSV = () => {
   return (
     <div className="container mx-auto p-4">
       <p className="text-4xl font-extrabold mb-6 text-gray-800 border-b-4 border-blue-500 inline-block pb-1">
-        ข้อมูลสภาพอากาศราย 3 ชั่วโมง 🌤️
+        ข้อมูลสภาพอากาศรายชั่วโมง
       </p>
 
       <div className="flex flex-wrap gap-4 items-end p-4 bg-blue-50 rounded-xl shadow-lg mb-8 border border-blue-200">
