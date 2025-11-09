@@ -6,7 +6,6 @@ import { FaDownload, FaSmog, FaExclamationTriangle, FaCalendarAlt, FaGasPump } f
 import "react-datepicker/dist/react-datepicker.css";
 import { useRouter } from "next/navigation";
 
-// --- INTERFACE DEFINITIONS ---
 
 interface BaseGas {
   id: number;

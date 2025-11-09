@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           >
             &#9776;
           </button>
-          <span className="font-bold text-lg">เก็บข้อมูลสภาพอากาศ</span>
+          <span className="font-bold text-lg">เก็บข้อมูลสภาพอากาศในแตจต่ละวัน</span>
         </div>
 
         <div className="flex items-center space-x-4 relative">
